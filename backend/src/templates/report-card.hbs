@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Report Card</title>
+  <style>
+    {{{tailwindCss}}}
+  </style>
+  <style>
+    body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      font-size: 8rem;
+      font-weight: 900;
+      color: rgba(225, 29, 72, 0.15);
+      z-index: 100;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .brand-text { color: {{primaryColor}}; }
+    .brand-bg { background-color: {{primaryColor}}; }
+    .brand-border { border-color: {{primaryColor}}; }
+    .brand-bg-light { background-color: {{primaryColor}}20; } /* 20% opacity hex */
+  </style>
+</head>
+<body class="bg-white text-slate-800 p-8 relative min-h-screen flex flex-col">
+  {{#isPaid hasPaidFees}}
+  {{else}}
+    <div class="watermark">FEES PENDING</div>
+  {{/isPaid}}
+
+  <!-- Header -->
+  <header class="flex justify-between items-center border-b-4 brand-border pb-6 mb-8">
+    <div class="flex items-center">
+      {{#if logoUrl}}
+        <img src="{{logoUrl}}" class="w-20 h-20 object-contain mr-6" />
+      {{else}}
+        <div class="w-20 h-20 brand-bg rounded-full flex items-center justify-center text-white font-black text-3xl shadow-lg mr-6">
+          NE
+        </div>
+      {{/if}}
+      <div>
+        <h1 class="text-3xl font-black text-slate-900 tracking-tight uppercase">{{schoolName}}</h1>
+        <p class="text-slate-500 font-bold tracking-widest text-sm mt-1">Excellence in Education</p>
+      </div>
+    </div>
+    <div class="text-right">
+      <h2 class="text-2xl font-black brand-text">TERMINAL REPORT</h2>
+      <p class="text-slate-500 font-bold">{{academicTerm}}</p>
+    </div>
+  </header>
+
+  <!-- Student Info -->
+  <section class="grid grid-cols-2 gap-8 mb-10 bg-slate-50 p-6 rounded-2xl border border-slate-100">
+    <div>
+      <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Student Name</p>
+      <p class="text-xl font-black text-slate-900">{{studentName}}</p>
+    </div>
+    <div>
+      <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Admission Number</p>
+      <p class="text-xl font-black text-slate-900">{{admissionNumber}}</p>
+    </div>
+    <div>
+      <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Class</p>
+      <p class="text-xl font-black text-slate-900">{{className}}</p>
+    </div>
+    <div>
+      <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Attendance</p>
+      <p class="text-xl font-black text-slate-900">{{daysPresent}} <span class="text-sm text-slate-500">/ {{daysOpened}} days</span></p>
+    </div>
+  </section>
+
+  {{#isPaid hasPaidFees}}
+  <!-- Academic Record -->
+  <section class="mb-10 flex-1">
+    <h3 class="text-lg font-black text-slate-900 border-b-2 border-slate-200 pb-2 mb-4 uppercase tracking-widest">Academic Performance</h3>
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="brand-bg-light border-b-2 brand-border">
+          <th class="py-3 px-4 font-black brand-text text-xs uppercase w-1/3">Subject</th>
+          <th class="py-3 px-4 font-black brand-text text-xs uppercase text-center">CA 1 (20)</th>
+          <th class="py-3 px-4 font-black brand-text text-xs uppercase text-center">CA 2 (20)</th>
+          <th class="py-3 px-4 font-black brand-text text-xs uppercase text-center">Exam (60)</th>
+          <th class="py-3 px-4 font-black brand-text text-xs uppercase text-center">Total (100)</th>
+          <th class="py-3 px-4 font-black brand-text text-xs uppercase text-center">Grade</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {{#each scores}}
+        <tr>
+          <td class="py-3 px-4 font-bold text-slate-700">{{subject}}</td>
+          <td class="py-3 px-4 text-center font-medium">{{ca1}}</td>
+          <td class="py-3 px-4 text-center font-medium">{{ca2}}</td>
+          <td class="py-3 px-4 text-center font-medium">{{exam}}</td>
+          <td class="py-3 px-4 text-center font-black text-slate-900">{{totalScore}}</td>
+          <td class="py-3 px-4 text-center font-black {{#if (eq gradingLetter 'F')}}text-rose-500{{else}}brand-text{{/if}}">{{gradingLetter}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Psychomotor & Remarks -->
+  <section class="grid grid-cols-2 gap-8 mb-10">
+    <div>
+      <h3 class="text-lg font-black text-slate-900 border-b-2 border-slate-200 pb-2 mb-4 uppercase tracking-widest">Psychomotor Skills (1-5)</h3>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center"><span class="font-bold text-slate-600">Punctuality</span><span class="font-black bg-slate-100 px-3 py-1 rounded-lg">{{punctuality}}</span></div>
+        <div class="flex justify-between items-center"><span class="font-bold text-slate-600">Neatness</span><span class="font-black bg-slate-100 px-3 py-1 rounded-lg">{{neatness}}</span></div>
+        <div class="flex justify-between items-center"><span class="font-bold text-slate-600">Teamwork</span><span class="font-black bg-slate-100 px-3 py-1 rounded-lg">{{teamwork}}</span></div>
+      </div>
+    </div>
+    <div>
+      <h3 class="text-lg font-black text-slate-900 border-b-2 border-slate-200 pb-2 mb-4 uppercase tracking-widest">Form Master's Remark</h3>
+      <div class="bg-teal-50 border border-teal-100 rounded-xl p-6 italic font-medium text-slate-700 leading-relaxed min-h-[120px]">
+        "{{remark}}"
+      </div>
+    </div>
+  </section>
+  {{else}}
+  <!-- Blocked Record -->
+  <section class="flex-1 flex flex-col items-center justify-center bg-rose-50 border-2 border-dashed border-rose-200 rounded-3xl p-12 text-center">
+    <div class="w-20 h-20 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mb-6">
+      <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+    </div>
+    <h3 class="text-2xl font-black text-rose-900 mb-2">Result Withheld</h3>
+    <p class="text-rose-700 font-medium max-w-md">This academic report has been temporarily withheld pending fee clearance. Please contact the Bursary department to resolve this matter.</p>
+  </section>
+  {{/isPaid}}
+
+  <footer class="mt-auto border-t-2 border-slate-100 pt-6 flex justify-between items-center text-sm font-bold text-slate-400">
+    <div>Generated automatically by Namu Enterprise</div>
+    <div>{{currentDate}}</div>
+  </footer>
+</body>
+</html>

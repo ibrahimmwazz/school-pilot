@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #e11d48;
+  --color-secondary: #4f46e5;
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+}
+
+.glass-panel {
+  @apply bg-white/85 backdrop-blur-md border border-gray-100/80 shadow-xl shadow-gray-200/40 rounded-3xl transition-all duration-300;
+}
+
+.bg-gradient-dual {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+}
+
+.text-gradient-dual {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.btn-primary {
+  @apply bg-brand-600 text-white font-medium px-4 py-2 rounded-lg shadow hover:bg-brand-700 transition-colors duration-200 active:scale-95;
+}
+
+.btn-secondary {
+  @apply bg-white text-gray-700 border border-gray-300 font-medium px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 transition-colors duration-200 active:scale-95;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #timetable-print-area, #timetable-print-area * {
+    visibility: visible;
+  }
+  #timetable-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+
+  /* Page Layout standards and orientation bindings */
+  @page landscape-layout {
+    size: A4 landscape;
+    margin: 0.5cm;
+  }
+  @page portrait-layout {
+    size: A4 portrait;
+    margin: 0.5cm;
+  }
+  @page a3-landscape-layout {
+    size: A3 landscape;
+    margin: 0.5cm;
+  }
+  @page letter-landscape-layout {
+    size: letter landscape;
+    margin: 0.5cm;
+  }
+  @page legal-landscape-layout {
+    size: legal landscape;
+    margin: 0.5cm;
+  }
+
+  .print-landscape {
+    page: landscape-layout;
+  }
+  .print-portrait {
+    page: portrait-layout;
+  }
+  .print-a3-landscape {
+    page: a3-landscape-layout;
+  }
+  .print-letter-landscape {
+    page: letter-landscape-layout;
+  }
+  .print-legal-landscape {
+    page: legal-landscape-layout;
+  }
+}
