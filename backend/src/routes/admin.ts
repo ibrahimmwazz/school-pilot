@@ -9,7 +9,8 @@ import { auditLog } from '../middlewares/audit';
 import prisma from '../services/db';
 
 const router = Router();
-const upload = multer({ dest: 'uploads/' });
+import os from 'os';
+const upload = multer({ dest: os.tmpdir() });
 
 router.use(requireAuth);
 
