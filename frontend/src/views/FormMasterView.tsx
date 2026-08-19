@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, FileText, AlertTriangle, CheckCircle2, ShieldCheck, Download, Plus, X, WifiOff, ArrowLeft } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { FormMasterAttendanceView } from './FormMasterAttendanceView';
+import { BatchReportCardExporter } from '../components/BatchReportCardExporter';
 
 export function FormMasterView() {
+  const [activeTab, setActiveTab] = useState<'ROSTER' | 'ATTENDANCE' | 'REPORTS'>('ROSTER');
   const [isLocking, setIsLocking] = useState(false);
   const [locked, setLocked] = useState(false);
   const [reportUrl, setReportUrl] = useState<string | null>(null);
@@ -289,7 +292,30 @@ export function FormMasterView() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="flex items-center space-x-2 bg-gray-100 p-1.5 rounded-2xl w-fit">
+        <button 
+          onClick={() => setActiveTab('ROSTER')} 
+          className={cn("px-6 py-2.5 text-sm font-bold rounded-xl transition-all", activeTab === 'ROSTER' ? "bg-white text-brand-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+        >
+          Class Roster & Grades
+        </button>
+        <button 
+          onClick={() => setActiveTab('ATTENDANCE')} 
+          className={cn("px-6 py-2.5 text-sm font-bold rounded-xl transition-all", activeTab === 'ATTENDANCE' ? "bg-white text-brand-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+        >
+          Daily Attendance
+        </button>
+        <button 
+          onClick={() => setActiveTab('REPORTS')} 
+          className={cn("px-6 py-2.5 text-sm font-bold rounded-xl transition-all", activeTab === 'REPORTS' ? "bg-white text-brand-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+        >
+          Report Cards
+        </button>
+      </div>
+
+      {activeTab === 'ROSTER' && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-3xl p-8 border border-gray-100 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-brand-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" />
           <div className="relative z-10">
@@ -360,7 +386,7 @@ export function FormMasterView() {
                     <td className="py-4 px-6 text-right">
                       {locked ? (
                         <a 
-                          href={`http://localhost:4000/reports/report-${enrollment.student?.admissionNumber?.replace(/[^a-zA-Z0-9]/g, '')}-${activeTermId}.pdf`}
+                          href={`/api/reports/report-${enrollment.student?.admissionNumber?.replace(/[^a-zA-Z0-9]/g, '')}-${activeTermId}.pdf`}
                           target="_blank"
                           rel="noreferrer"
                           className="bg-brand-600 hover:bg-brand-700 text-white font-black py-2 px-5 rounded-xl transition-all inline-flex items-center shadow-lg shadow-brand-500/20"
@@ -430,6 +456,18 @@ export function FormMasterView() {
 
         </div>
       </div>
+        </>
+      )}
+
+      {activeTab === 'ATTENDANCE' && (
+        <FormMasterAttendanceView />
+      )}
+
+      {activeTab === 'REPORTS' && (
+        <BatchReportCardExporter 
+          section={lockedClass.name.startsWith('Primary') || lockedClass.name.startsWith('Nursery') ? 'PRIMARY' : 'SECONDARY'} 
+        />
+      )}
 
       {showAddModal && (
         <div className="fixed inset-0 bg-gray-900/40 z-50 flex items-center justify-center backdrop-blur-sm p-4">

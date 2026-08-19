@@ -49,7 +49,7 @@ export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps)
         </div>
 
         <div className="p-4 border-t border-gray-100 bg-gray-50 text-center text-xs font-bold text-gray-400">
-          Namu School Pilot Real-time Alerts
+          School Pilot Real-time Alerts
         </div>
       </div>
     </div>

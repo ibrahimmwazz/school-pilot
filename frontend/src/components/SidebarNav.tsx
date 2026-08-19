@@ -84,7 +84,7 @@ export function SidebarNav({
             <ShieldCheck className="w-5 h-5 text-gray-500" />
           </div>
           <div className="overflow-hidden">
-            <p className="text-xs font-black text-gray-800 truncate">Namu Admin</p>
+            <p className="text-xs font-black text-gray-800 truncate">School Admin</p>
             <p className="text-[10px] font-bold text-emerald-600 flex items-center">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>
               Active Session

@@ -38,7 +38,7 @@ export function HeroWelcomeBanner({
         <div className="space-y-2">
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-xs font-bold tracking-wide border border-white/20">
             <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-            <span>Namu School Management System</span>
+            <span>School Management System</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight">

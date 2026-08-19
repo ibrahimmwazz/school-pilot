@@ -33,7 +33,7 @@ const limiter = rateLimit({
 });
 
 app.use('/api', limiter);
-app.use('/reports', express.static(path.join(__dirname, '../public/reports')));
+app.use('/api/reports', express.static(path.join(__dirname, '../public/reports')));
 
 // Routes
 app.use('/api/auth', authRouter);

@@ -6,13 +6,11 @@ import { TimetableGenerator } from '../components/TimetableGenerator';
 import { TimetableGrid } from '../components/TimetableGrid';
 import { DirectoryTab } from '../components/DirectoryTab';
 import { SettingsTab } from '../components/SettingsTab';
-import { FormMasterAttendanceView } from './FormMasterAttendanceView';
 import { HeroWelcomeBanner } from '../components/HeroWelcomeBanner';
 import { SparklineGraph } from '../components/SparklineGraph';
 import { AcademicCalendarWidget } from '../components/AcademicCalendarWidget';
 import { CommandPalette } from '../components/CommandPalette';
 import { MobileBottomNav } from '../components/MobileBottomNav';
-import { BatchReportCardExporter } from '../components/BatchReportCardExporter';
 import { AcademicRiskAnalyzer } from '../components/AcademicRiskAnalyzer';
 import { LibraryTab } from '../components/LibraryTab';
 
@@ -304,11 +302,7 @@ export function HeadMasterView() {
             </div>
           </div>
 
-          {/* Academic Event Calendar & Deadline Widget */}
           <AcademicCalendarWidget canAddEvent={true} primaryColor={primaryColor} secondaryColor={secondaryColor} />
-
-          {/* Batch Report Card Exporter */}
-          <BatchReportCardExporter section="PRIMARY" primaryColor={primaryColor} secondaryColor={secondaryColor} />
 
           {/* AI Academic Risk Analyzer */}
           <AcademicRiskAnalyzer />
@@ -408,10 +402,6 @@ export function HeadMasterView() {
 
       {activeTab === 'DIRECTORY' && (
         <DirectoryTab section="PRIMARY" searchQuery={searchQuery} />
-      )}
-
-      {activeTab === 'ATTENDANCE' && (
-        <FormMasterAttendanceView />
       )}
 
       {activeTab === 'TIMETABLE' && (

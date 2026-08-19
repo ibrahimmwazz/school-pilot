@@ -28,7 +28,7 @@ export interface LocalScore {
   syncStatus: 'local_only' | 'synced';
 }
 
-export class NamuOfflineDB extends Dexie {
+export class SchoolOfflineDB extends Dexie {
   roster!: Table<LocalStudent, string>;
   assignments!: Table<LocalAssignment, string>;
   scores!: Table<LocalScore, number>;
@@ -38,7 +38,7 @@ export class NamuOfflineDB extends Dexie {
   pendingEvaluationsSyncs!: Table<any, number>;
 
   constructor() {
-    super('NamuOfflineDB_v3');
+    super('SchoolOfflineDB_v3');
     this.version(1).stores({
       roster: 'id, admissionNumber',
       assignments: 'classId, subjectId',
@@ -59,4 +59,4 @@ export class NamuOfflineDB extends Dexie {
   }
 }
 
-export const db = new NamuOfflineDB();
+export const db = new SchoolOfflineDB();

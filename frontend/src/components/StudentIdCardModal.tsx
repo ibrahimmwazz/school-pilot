@@ -42,7 +42,7 @@ export function StudentIdCardModal({
           >
             <div className="flex items-center space-x-2">
               <School className="w-5 h-5" />
-              <span className="font-black text-base tracking-wide uppercase">Namu School Pilot</span>
+              <span className="font-black text-base tracking-wide uppercase">School Pilot</span>
             </div>
           </div>
 

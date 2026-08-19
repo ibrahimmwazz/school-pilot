@@ -13,7 +13,7 @@ async function main() {
   // 1. Create a School
   const school = await prisma.school.create({
     data: {
-      name: 'Namu Enterprise Pilot School',
+      name: 'School Enterprise Pilot School',
       reportTemplateConfig: {
         theme: { primary_color: '#0d9488', secondary_color: '#111827' },
         grading_scale: [

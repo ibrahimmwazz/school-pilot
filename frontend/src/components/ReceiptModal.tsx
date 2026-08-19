@@ -43,7 +43,7 @@ export function ReceiptModal({
                 <School className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-black text-lg text-gray-900">Namu School Pilot</h3>
+                <h3 className="font-black text-lg text-gray-900">School Pilot</h3>
                 <p className="text-[10px] font-extrabold text-brand-600 uppercase tracking-widest">Official Bursary Receipt</p>
               </div>
             </div>

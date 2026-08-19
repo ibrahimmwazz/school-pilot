@@ -115,7 +115,7 @@ export function Layout({ user, onLogout }: LayoutProps) {
                 
                 {!isCollapsed && (
                   <div className="overflow-hidden transition-all duration-300">
-                    <h1 className="text-2xl font-black text-gray-900 tracking-tight leading-none">Namu</h1>
+                    <h1 className="text-2xl font-black text-gray-900 tracking-tight leading-none">School</h1>
                     <p className="text-[11px] font-extrabold text-brand-600 uppercase tracking-widest mt-1">Pilot Program</p>
                   </div>
                 )}

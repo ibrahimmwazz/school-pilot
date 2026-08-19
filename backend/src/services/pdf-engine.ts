@@ -34,7 +34,7 @@ export class PdfEngine {
       // Fetch school branding (Assuming enrollments belong to one school)
       let primaryColor = '#e11d48'; // default
       let logoUrl = '';
-      let schoolName = 'Namu Enterprise Pilot School';
+      let schoolName = 'School Enterprise Pilot School';
       
       if (enrollments.length > 0) {
         const schoolId = enrollments[0].student.schoolId;

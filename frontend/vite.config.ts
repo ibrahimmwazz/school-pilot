@@ -14,8 +14,8 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg}']
       },
       manifest: {
-        name: 'Namu Model School Pilot',
-        short_name: 'Namu',
+        name: 'School Pilot',
+        short_name: 'School',
         description: 'Offline-First School Digitization and Report Card Management System',
         theme_color: '#0d9488'
       }

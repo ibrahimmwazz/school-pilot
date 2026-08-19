@@ -100,7 +100,7 @@ export function CommandPalette({ isOpen, onClose, onSelectTab }: CommandPaletteP
         {/* Footer Hint */}
         <div className="bg-gray-50 px-6 py-3 border-t border-gray-100 flex justify-between items-center text-xs font-bold text-gray-400">
           <span>Tip: Press <kbd className="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-[10px] font-mono">Ctrl + K</kbd> anytime to open</span>
-          <span>Namu Command Palette</span>
+          <span>School Command Palette</span>
         </div>
       </div>
     </div>

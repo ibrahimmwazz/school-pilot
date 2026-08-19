@@ -58,7 +58,7 @@ export function LoginView({ onLogin }: LoginViewProps) {
               Welcome back
             </h1>
             <p className="text-sm text-gray-500 mt-2 font-medium text-center">
-              Sign in to your Namu account
+              Sign in to your School account
             </p>
           </div>
 
@@ -117,7 +117,7 @@ export function LoginView({ onLogin }: LoginViewProps) {
         </div>
 
         <p className="text-center text-sm text-gray-500 mt-8 font-medium">
-          Namu School Management Pilot
+          School Management Pilot
         </p>
       </div>
     </div>

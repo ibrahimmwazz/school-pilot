@@ -23,7 +23,7 @@ export function BatchReportCardExporter({
     setIsGenerating(true);
     setTimeout(() => {
       setIsGenerating(false);
-      window.open('http://localhost:4000/reports/pilot-report.pdf', '_blank');
+      window.open('/api/reports/pilot-report.pdf', '_blank');
     }, 1200);
   };
 
