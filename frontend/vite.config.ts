@@ -17,19 +17,7 @@ export default defineConfig({
         name: 'Namu Model School Pilot',
         short_name: 'Namu',
         description: 'Offline-First School Digitization and Report Card Management System',
-        theme_color: '#0d9488',
-        icons: [
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
-        ]
+        theme_color: '#0d9488'
       }
     })
   ],
