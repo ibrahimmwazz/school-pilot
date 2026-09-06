@@ -6,6 +6,7 @@ import {
   ChevronLeft, CheckSquare, TrendingUp
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { NetworkStatusBar } from './NetworkStatusBar';
 
 interface LayoutProps {
   user: any;
@@ -19,11 +20,13 @@ export function Layout({ user, onLogout }: LayoutProps) {
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'DIRECTORY' | 'ATTENDANCE' | 'TIMETABLE' | 'COMMUNICATIONS' | 'SETTINGS'>('OVERVIEW');
   const [teacherActiveTab, setTeacherActiveTab] = useState<'DASHBOARD' | 'GRADING' | 'HOMEWORK' | 'LESSON_PLANS'>('DASHBOARD');
   const [studentActiveTab, setStudentActiveTab] = useState<'OVERVIEW' | 'SUBJECTS' | 'TIMETABLE'>('OVERVIEW');
+  const [formMasterActiveTab, setFormMasterActiveTab] = useState<'ROSTER' | 'ATTENDANCE' | 'REPORTS'>('ROSTER');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [primaryColor, setPrimaryColor] = useState(() => localStorage.getItem('primaryColor') || '#e11d48');
   const [secondaryColor, setSecondaryColor] = useState(() => localStorage.getItem('secondaryColor') || '#4f46e5');
   const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem('schoolLogo') || '');
+  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--color-primary', primaryColor);
@@ -41,6 +44,7 @@ export function Layout({ user, onLogout }: LayoutProps) {
   const isPortalAdmin = ['PRINCIPAL', 'HEAD_MASTER', 'ADMIN'].includes(user?.role);
   const isTeacher = user?.role === 'TEACHER';
   const isStudent = user?.role === 'STUDENT';
+  const isFormMaster = user?.role === 'FORM_MASTER';
 
   const getInitials = () => {
     return user?.name ? user.name.slice(0, 2).toUpperCase() : 'U';
@@ -61,10 +65,19 @@ export function Layout({ user, onLogout }: LayoutProps) {
   const portalTabs = [
     { id: 'OVERVIEW', label: 'Overview', icon: LayoutDashboard },
     { id: 'DIRECTORY', label: 'Directory', icon: Users },
+    { id: 'BROADSHEET', label: 'Broadsheet', icon: FileText },
+    { id: 'CURRICULUM', label: 'Curriculum', icon: BookOpen },
     { id: 'ATTENDANCE', label: 'Attendance', icon: ShieldCheck },
     { id: 'TIMETABLE', label: 'Timetable', icon: Calendar },
     { id: 'COMMUNICATIONS', label: 'Communications', icon: MessageSquare },
     { id: 'SETTINGS', label: 'Settings', icon: Settings },
+  ] as const;
+
+  const formMasterTabs = [
+    { id: 'ROSTER', label: 'Class Roster', icon: Users },
+    { id: 'ATTENDANCE', label: 'Daily Attendance', icon: ShieldCheck },
+    { id: 'BROADSHEET', label: 'Class Broadsheet', icon: FileText },
+    { id: 'REPORTS', label: 'Report Cards', icon: CheckSquare },
   ] as const;
 
   const teacherTabs = [
@@ -106,8 +119,8 @@ export function Layout({ user, onLogout }: LayoutProps) {
                   className="w-11 h-11 rounded-2xl flex items-center justify-center text-white shadow-lg overflow-hidden shrink-0 transition-transform hover:scale-105"
                   style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
                 >
-                  {logoUrl ? (
-                    <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" onError={(e) => { (e.target as any).style.display = 'none'; }} />
+                  {logoUrl && !logoError ? (
+                    <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" onError={() => setLogoError(true)} />
                   ) : (
                     <School className="w-6 h-6 text-white" />
                   )}
@@ -149,6 +162,33 @@ export function Layout({ user, onLogout }: LayoutProps) {
                     key={tab.id}
                     onClick={() => {
                       setActiveTab(tab.id);
+                      setIsSidebarOpen(false);
+                    }}
+                    title={isCollapsed ? tab.label : undefined}
+                    className={cn(
+                      "w-full flex items-center rounded-2xl text-sm font-bold transition-all duration-300 group",
+                      isCollapsed ? "lg:justify-center lg:px-0 lg:py-3.5 px-4 py-3.5 space-x-3.5" : "space-x-3.5 px-4 py-3.5",
+                      isActive
+                        ? "text-white shadow-lg shadow-brand-500/20 scale-[1.02]"
+                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                    )}
+                    style={isActive ? { background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` } : undefined}
+                  >
+                    <Icon className={cn("w-5 h-5 shrink-0 transition-transform group-hover:scale-110", isActive ? "text-white" : "text-gray-400 group-hover:text-gray-700")} />
+                    {!isCollapsed && <span className="tracking-tight truncate">{tab.label}</span>}
+                  </button>
+                );
+              })
+            ) : isFormMaster ? (
+              // Navigation Tabs for Form Master
+              formMasterTabs.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = formMasterActiveTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      setFormMasterActiveTab(tab.id as any);
                       setIsSidebarOpen(false);
                     }}
                     title={isCollapsed ? tab.label : undefined}
@@ -309,8 +349,11 @@ export function Layout({ user, onLogout }: LayoutProps) {
           </div>
         </header>
 
+        {/* Universal Real-Time Network & Sync Status Banner */}
+        <NetworkStatusBar />
+
         {/* Outlet rendering PrincipalView, HeadMasterView, TeacherView, StudentView, etc. */}
-        <div className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto animate-in fade-in duration-300">
+        <div className="flex-1 px-3 sm:px-6 md:px-8 py-4 sm:py-6 max-w-7xl w-full mx-auto pb-24 lg:pb-8 animate-in fade-in duration-300">
           <Outlet context={{
             activeTab,
             setActiveTab,
@@ -318,6 +361,8 @@ export function Layout({ user, onLogout }: LayoutProps) {
             setTeacherActiveTab,
             studentActiveTab,
             setStudentActiveTab,
+            formMasterActiveTab,
+            setFormMasterActiveTab,
             searchQuery,
             setSearchQuery,
             primaryColor,

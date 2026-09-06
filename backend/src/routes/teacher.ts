@@ -441,12 +441,38 @@ router.post('/lesson-plans', async (req: AuthRequest, res) => {
         subjectId,
         title,
         content,
-        weekNumber: parseInt(weekNumber, 10)
+        weekNumber: parseInt(weekNumber, 10),
+        status: 'DRAFT'
       },
       include: { class: true, subject: true }
     });
 
     res.json({ message: 'Lesson Plan created successfully', plan });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Submit Lesson Plan / Scheme of Work to Academic Head
+router.post('/lesson-plans/:id/submit', async (req: AuthRequest, res) => {
+  try {
+    const schoolId = req.user?.schoolId;
+    const staffId = req.user?.id;
+    const { id } = req.params;
+
+    const plan = await prisma.lessonPlan.findFirst({
+      where: { id, teacherId: staffId, schoolId }
+    });
+    if (!plan) return res.status(404).json({ message: 'Lesson plan not found' });
+
+    const updated = await prisma.lessonPlan.update({
+      where: { id },
+      data: { status: 'SUBMITTED' },
+      include: { class: true, subject: true }
+    });
+
+    res.json({ message: 'Lesson plan submitted for administrative review', plan: updated });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

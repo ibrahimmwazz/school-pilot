@@ -13,6 +13,8 @@ import { CommandPalette } from '../components/CommandPalette';
 import { MobileBottomNav } from '../components/MobileBottomNav';
 import { AcademicRiskAnalyzer } from '../components/AcademicRiskAnalyzer';
 import { LibraryTab } from '../components/LibraryTab';
+import { BroadsheetMasterTab } from '../components/BroadsheetMasterTab';
+import { CurriculumReviewTab } from '../components/CurriculumReviewTab';
 
 export function HeadMasterView() {
   const {
@@ -43,12 +45,8 @@ export function HeadMasterView() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const staffFileInputRef = useRef<HTMLInputElement>(null);
 
-  const [showAddModal, setShowAddModal] = useState(false);
   const [isCmdOpen, setIsCmdOpen] = useState(false);
   const [classes, setClasses] = useState<any[]>([]);
-  const [newStudent, setNewStudent] = useState({
-    firstName: '', lastName: '', admissionNumber: '', dateOfBirth: '', gender: 'MALE', classId: ''
-  });
   
   const [timetable, setTimetable] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
@@ -64,9 +62,8 @@ export function HeadMasterView() {
       const res = await fetch('/api/admin/stats?section=PRIMARY', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
-      if (res.ok) {
-        setStatsData(await res.json());
-      }
+      if (!res.ok) throw new Error('Failed to fetch stats');
+      setStatsData(await res.json());
     } catch (e) {
       console.error(e);
     }
@@ -77,10 +74,9 @@ export function HeadMasterView() {
       const res = await fetch(`/api/timetable${activeTermId ? `?termId=${activeTermId}` : ''}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
-      if (res.ok) {
-        const data = await res.json();
-        setTimetable(Array.isArray(data) ? data : []);
-      }
+      if (!res.ok) throw new Error('Failed to fetch timetable');
+      const data = await res.json();
+      setTimetable(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
     }
@@ -90,15 +86,15 @@ export function HeadMasterView() {
     fetchStats();
     fetch('/api/school/metadata', {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-    }).then(res => res.json()).then(data => {
+    }).then(async res => {
+      if (!res.ok) throw new Error('Failed to fetch metadata');
+      return res.json();
+    }).then(data => {
       const primaryClasses = (data.classes || []).filter((c: any) => c.name.toLowerCase().includes('primary') || c.name.toLowerCase().includes('nur'));
       setClasses(primaryClasses.length > 0 ? primaryClasses : (data.classes || []));
       const activeTerm = data.terms?.find((t: any) => t.isActive)?.id;
       if (activeTerm) {
         setActiveTermId(activeTerm);
-      }
-      if (data.classes && data.classes.length > 0) {
-        setNewStudent(prev => ({ ...prev, classId: data.classes[0].id }));
       }
     }).catch(console.error);
   }, []);
@@ -191,48 +187,14 @@ export function HeadMasterView() {
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsUploadingPupil(true);
-    try {
-      const response = await fetch('/api/admin/students', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ ...newStudent, section: 'Primary' }),
-      });
-
-      if (!response.ok) throw new Error('Failed to register pupil');
-      
-      alert('Pupil registered successfully!');
-      setShowAddModal(false);
-      setNewStudent({ firstName: '', lastName: '', admissionNumber: '', dateOfBirth: '', gender: 'MALE', classId: classes[0]?.id || '' });
-      fetchStats();
-    } catch (err: any) {
-      alert(err.message || 'Error registering pupil.');
-    } finally {
-      setIsUploadingPupil(false);
-    }
-  };
-
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight">Headmaster Portal</h1>
-          <p className="text-gray-500 font-medium mt-1">Primary Section Management & Academic Oversight</p>
+          <p className="text-gray-500 font-medium mt-1">Primary School Administration & Academic Oversight</p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="px-5 py-3 rounded-2xl text-white font-bold text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center shrink-0"
-          style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          <span>Register Primary Pupil</span>
-        </button>
       </div>
 
       {activeTab === 'OVERVIEW' && (
@@ -255,49 +217,41 @@ export function HeadMasterView() {
               </div>
               <div className="relative z-10 space-y-3">
                 <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Total Primary Pupils</h3>
-                <div className="flex items-baseline justify-between">
-                  <div className="text-5xl font-black text-gray-900 tracking-tight">{statsData.totalStudents.toLocaleString()}</div>
-                  <SparklineGraph color="#059669" data={[100, 200, 400, 600, 750, 810]} />
+                <div className="text-5xl font-black text-gray-900">{statsData.totalStudents}</div>
+                <div className="h-8 mt-2 w-full opacity-60">
+                  <svg viewBox="0 0 100 20" className="w-full h-full preserve-3d" preserveAspectRatio="none">
+                    <polyline points="0,20 100,20" fill="none" stroke="transparent" />
+                  </svg>
                 </div>
-                <p className="text-xs font-bold text-emerald-600 flex items-center pt-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Active Enrolled Roster
-                </p>
               </div>
             </div>
 
-            {/* Card 2: Total Primary Staff */}
+            {/* Card 2: Total Staff */}
             <div className="bg-white rounded-3xl p-8 border border-gray-100 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] transition-all">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110 flex items-center justify-center p-4">
-                <Briefcase className="w-7 h-7 text-blue-600 ml-3 mb-3" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110 flex items-center justify-center p-4">
+                <GraduationCap className="w-7 h-7 text-indigo-600 ml-3 mb-3" />
               </div>
               <div className="relative z-10 space-y-3">
-                <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Total Primary Staff</h3>
-                <div className="flex items-baseline justify-between">
-                  <div className="text-5xl font-black text-gray-900 tracking-tight">{statsData.totalStaff.toLocaleString()}</div>
-                  <SparklineGraph color="#2563eb" data={[5, 10, 15, 20, 25, 30]} />
+                <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Total Staff</h3>
+                <div className="text-5xl font-black text-indigo-600">{statsData.totalStaff}</div>
+                <div className="h-8 mt-2 w-full opacity-60">
+                  <svg viewBox="0 0 100 20" className="w-full h-full preserve-3d" preserveAspectRatio="none">
+                    <polyline points="0,20 100,20" fill="none" stroke="transparent" />
+                  </svg>
                 </div>
-                <p className="text-xs font-bold text-blue-600 flex items-center pt-2">
-                  <span className="w-2 h-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span> Primary Teachers & Staff
-                </p>
               </div>
             </div>
 
-            {/* Card 3: Attendance Rate */}
+            {/* Card 3: Overall Attendance */}
             <div className="bg-white rounded-3xl p-8 border border-gray-100 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] transition-all">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-teal-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110 flex items-center justify-center p-4">
-                <BarChart3 className="w-7 h-7 text-teal-600 ml-3 mb-3" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110 flex items-center justify-center p-4">
+                <Activity className="w-7 h-7 text-emerald-600 ml-3 mb-3" />
               </div>
               <div className="relative z-10 space-y-3">
-                <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Primary Attendance Rate</h3>
-                <div className="flex items-baseline justify-between">
-                  <div className="text-5xl font-black text-teal-600 flex items-center tracking-tight">
-                    96.8%
-                  </div>
-                  <SparklineGraph color="#0d9488" data={[88, 90, 92, 94, 95, 96.8]} />
+                <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Overall Attendance</h3>
+                <div className="text-5xl font-black text-emerald-500 flex items-center">
+                  --% <CheckCircle2 className="ml-3 w-8 h-8 text-emerald-500" />
                 </div>
-                <p className="text-xs font-bold text-teal-600 flex items-center pt-2">
-                  <span className="w-2 h-2 rounded-full bg-teal-500 mr-1.5"></span> +1.5% from last week
-                </p>
               </div>
             </div>
           </div>
@@ -402,6 +356,14 @@ export function HeadMasterView() {
 
       {activeTab === 'DIRECTORY' && (
         <DirectoryTab section="PRIMARY" searchQuery={searchQuery} />
+      )}
+
+      {activeTab === 'BROADSHEET' && (
+        <BroadsheetMasterTab section="PRIMARY" />
+      )}
+
+      {activeTab === 'CURRICULUM' && (
+        <CurriculumReviewTab />
       )}
 
       {activeTab === 'TIMETABLE' && (

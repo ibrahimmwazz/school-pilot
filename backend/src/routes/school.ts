@@ -54,6 +54,73 @@ router.post('/settings', requireAuth, async (req: AuthRequest, res) => {
   }
 });
 
+// GET Assessment Configuration & Grading Scale
+router.get('/assessment-config', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const schoolId = req.user?.schoolId;
+    if (!schoolId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const school = await prisma.school.findUnique({
+      where: { id: schoolId },
+      select: { reportTemplateConfig: true }
+    });
+
+    const config = (school?.reportTemplateConfig as any) || {};
+    const assessmentStructure = config.assessment_structure || {
+      ca1: { name: 'CA 1 (Homework/Tests)', max: 15, weight: 15 },
+      ca2: { name: 'CA 2 (Mid-Term Test)', max: 15, weight: 15 },
+      ca3: { name: 'CA 3 (Project/Attendance)', max: 10, weight: 10 },
+      exam: { name: 'Final Examination', max: 60, weight: 60 }
+    };
+
+    const gradingScale = config.grading_scale || [
+      { min: 75, max: 100, grade: "A", remark: "Excellent" },
+      { min: 65, max: 74, grade: "B", remark: "Very Good" },
+      { min: 50, max: 64, grade: "C", remark: "Good" },
+      { min: 40, max: 49, grade: "D", remark: "Pass" },
+      { min: 0, max: 39, grade: "F", remark: "Fail" }
+    ];
+
+    res.json({ assessmentStructure, gradingScale });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST Update Assessment Configuration & Grading Scale (Admin / Principal)
+router.post('/assessment-config', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const schoolId = req.user?.schoolId;
+    if (!schoolId) return res.status(401).json({ message: 'Unauthorized' });
+
+    if (!['PRINCIPAL', 'HEAD_MASTER', 'ADMIN'].includes(req.user?.role || '')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    const { assessmentStructure, gradingScale } = req.body;
+
+    const school = await prisma.school.findUnique({ where: { id: schoolId } });
+    const currentConfig = (school?.reportTemplateConfig as any) || {};
+
+    const updatedConfig = {
+      ...currentConfig,
+      assessment_structure: assessmentStructure || currentConfig.assessment_structure,
+      grading_scale: gradingScale || currentConfig.grading_scale
+    };
+
+    const updated = await prisma.school.update({
+      where: { id: schoolId },
+      data: { reportTemplateConfig: updatedConfig }
+    });
+
+    res.json({ message: 'Assessment structure and grading scale updated successfully', config: updated.reportTemplateConfig });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // GET Academic Events (All Users)
 router.get('/events', requireAuth, async (req: AuthRequest, res) => {
   res.json(academicEvents);

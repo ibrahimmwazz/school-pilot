@@ -105,27 +105,64 @@ export function TeacherLessonPlansTab() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6">
-            {plans.map(plan => (
-              <div key={plan.id} className="border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all group flex flex-col md:flex-row gap-6 items-start">
-                <div className="bg-gray-50 w-full md:w-32 h-32 rounded-xl flex flex-col items-center justify-center shrink-0 border border-gray-100">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Week</span>
-                  <span className="text-5xl font-black text-brand-600">{plan.weekNumber}</span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex space-x-2">
-                      <span className="bg-brand-50 text-brand-700 text-xs font-bold px-3 py-1 rounded-full">{plan.subject.name}</span>
-                      <span className="text-xs font-bold text-gray-400 bg-gray-50 px-3 py-1 rounded-full">{plan.class.name}</span>
+            {plans.map(plan => {
+              const isApproved = plan.status === 'FINALIZED';
+              const isSubmitted = plan.status === 'SUBMITTED';
+
+              const handleSubmitReview = async () => {
+                try {
+                  const res = await fetch(`/api/teacher/lesson-plans/${plan.id}/submit`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                  });
+                  if (res.ok) {
+                    alert('Submitted for Principal review!');
+                    loadPlans();
+                  }
+                } catch (e: any) {
+                  alert(e.message || 'Error submitting');
+                }
+              };
+
+              return (
+                <div key={plan.id} className="border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-all group flex flex-col md:flex-row gap-6 items-start justify-between">
+                  <div className="flex gap-6 items-start flex-1">
+                    <div className="bg-gray-50 w-full md:w-32 h-32 rounded-xl flex flex-col items-center justify-center shrink-0 border border-gray-100">
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Week</span>
+                      <span className="text-5xl font-black text-brand-600">{plan.weekNumber}</span>
                     </div>
-                    <span className="flex items-center text-xs font-bold px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
-                      <Clock className="w-3 h-3 mr-1" /> {plan.status}
-                    </span>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex space-x-2">
+                          <span className="bg-brand-50 text-brand-700 text-xs font-bold px-3 py-1 rounded-full">{plan.subject?.name}</span>
+                          <span className="text-xs font-bold text-gray-400 bg-gray-50 px-3 py-1 rounded-full">{plan.class?.name}</span>
+                        </div>
+                        <span className={cn(
+                          "flex items-center text-xs font-bold px-3 py-1 rounded-full border",
+                          isApproved ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
+                          isSubmitted ? "bg-amber-50 text-amber-700 border-amber-100" :
+                          "bg-gray-50 text-gray-700 border-gray-100"
+                        )}>
+                          <Clock className="w-3 h-3 mr-1" />
+                          {isApproved ? 'Approved by Principal' : isSubmitted ? 'Submitted (Under Review)' : 'Draft'}
+                        </span>
+                      </div>
+                      <h3 className="font-black text-2xl text-gray-900 mb-2">{plan.title}</h3>
+                      <p className="text-gray-600 font-medium whitespace-pre-wrap text-sm">{plan.content}</p>
+                    </div>
                   </div>
-                  <h3 className="font-black text-2xl text-gray-900 mb-2">{plan.title}</h3>
-                  <p className="text-gray-600 font-medium whitespace-pre-wrap text-sm">{plan.content}</p>
+
+                  {!isApproved && !isSubmitted && (
+                    <button
+                      onClick={handleSubmitReview}
+                      className="px-4 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold text-xs rounded-xl transition-all self-end md:self-center"
+                    >
+                      Submit for Review
+                    </button>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

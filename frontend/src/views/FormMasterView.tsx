@@ -3,12 +3,13 @@ import { Lock, FileText, AlertTriangle, CheckCircle2, ShieldCheck, Download, Plu
 import { cn } from '../lib/utils';
 import { FormMasterAttendanceView } from './FormMasterAttendanceView';
 import { BatchReportCardExporter } from '../components/BatchReportCardExporter';
+import { BroadsheetMasterTab } from '../components/BroadsheetMasterTab';
+import { useOutletContext } from 'react-router-dom';
 
 export function FormMasterView() {
-  const [activeTab, setActiveTab] = useState<'ROSTER' | 'ATTENDANCE' | 'REPORTS'>('ROSTER');
+  const { formMasterActiveTab } = useOutletContext<any>();
   const [isLocking, setIsLocking] = useState(false);
   const [locked, setLocked] = useState(false);
-  const [reportUrl, setReportUrl] = useState<string | null>(null);
   
   const [showAddModal, setShowAddModal] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
@@ -46,7 +47,10 @@ export function FormMasterView() {
     // Fetch my-class first
     fetch('/api/form-master/my-class', {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-    }).then(res => res.json()).then(data => {
+    }).then(async res => {
+      if (!res.ok) throw new Error('Failed to fetch class');
+      return res.json();
+    }).then(data => {
       if (data.assignment?.class) {
         setLockedClass(data.assignment.class);
       }
@@ -57,7 +61,10 @@ export function FormMasterView() {
     // Also fetch metadata for classes in case they need to register one
     fetch('/api/school/metadata', {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-    }).then(res => res.json()).then(data => {
+    }).then(async res => {
+      if (!res.ok) throw new Error('Failed to fetch metadata');
+      return res.json();
+    }).then(data => {
       setMetadata(data);
       const activeTerm = data.terms?.find((t: any) => t.isActive)?.id;
       if (activeTerm) {
@@ -71,7 +78,10 @@ export function FormMasterView() {
       // Fetch compiled roster for this class
       fetch(`/api/form-master/compile/${lockedClass.id}/${activeTermId}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      }).then(res => res.json()).then(data => {
+      }).then(async res => {
+        if (!res.ok) throw new Error('Failed to fetch roster');
+        return res.json();
+      }).then(data => {
         if (data.enrollments) {
           setCompiledRoster(data.enrollments);
         }
@@ -110,7 +120,7 @@ export function FormMasterView() {
     setIsRegistering(true);
     try {
       const payload = { ...newStudent, classId: lockedClass.id };
-      const response = await fetch('/api/admin/students', {
+      const response = await fetch('/api/form-master/students', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -150,7 +160,6 @@ export function FormMasterView() {
       
       const data = await res.json();
       setLocked(true);
-      // Remove fake reportUrl logic
     } catch (e) {
       console.error(e);
       alert('Error locking class');
@@ -268,78 +277,57 @@ export function FormMasterView() {
 
   // MAIN DASHBOARD VIEW
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-700">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-black text-gray-900 tracking-tight">Dashboard <span className="text-brand-600 font-light">| Form Master</span></h1>
-          <div className="flex items-center mt-3 space-x-4">
-            <div className="bg-brand-50 border border-brand-100 text-brand-700 px-4 py-2 rounded-xl font-black uppercase tracking-widest text-sm flex items-center shadow-sm">
-              <span className="mr-2 text-brand-500">📍</span>
-              {lockedClass.name} {lockedClass.arm} <span className="mx-2 text-brand-300">|</span> First Term 2026
+          <h1 className="text-2xl sm:text-4xl font-black text-gray-900 tracking-tight">Dashboard <span className="text-brand-600 font-light">| Form Master</span></h1>
+          <div className="flex flex-wrap items-center mt-2.5 sm:mt-3 gap-2 sm:gap-4">
+            <div className="bg-brand-50 border border-brand-100 text-brand-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl font-black uppercase tracking-widest text-xs sm:text-sm flex items-center shadow-sm">
+              <span className="mr-1.5 text-brand-500">📍</span>
+              {lockedClass.name} {lockedClass.arm} <span className="mx-1.5 text-brand-300">|</span> First Term 2026
             </div>
             <button 
               onClick={() => setLockedClass(null)} 
-              className="text-sm font-black bg-white hover:bg-brand-600 text-gray-700 hover:text-white px-5 py-2 rounded-xl transition-all shadow-sm border-2 border-gray-200 hover:border-brand-600 flex items-center group"
+              className="text-xs sm:text-sm font-black bg-white hover:bg-brand-600 text-gray-700 hover:text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl transition-all shadow-sm border border-gray-200 hover:border-brand-600 flex items-center group"
             >
-              <ArrowLeft className="w-4 h-4 mr-2 text-gray-400 group-hover:text-white transition-colors" />
+              <ArrowLeft className="w-3.5 h-3.5 mr-1.5 text-gray-400 group-hover:text-white transition-colors" />
               Change Class
             </button>
           </div>
         </div>
-        <button onClick={() => setShowAddModal(true)} className="bg-brand-600 text-white font-black py-3 px-6 rounded-2xl hover:bg-brand-700 flex items-center shadow-lg shadow-brand-500/20">
-          <Plus className="w-5 h-5 mr-2" />
+        <button onClick={() => setShowAddModal(true)} className="w-full sm:w-auto bg-brand-600 text-white font-black py-2.5 sm:py-3 px-5 sm:px-6 rounded-2xl hover:bg-brand-700 flex items-center justify-center shadow-lg shadow-brand-500/20 text-xs sm:text-sm">
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5" />
           Register Student
         </button>
       </div>
 
-      <div className="flex items-center space-x-2 bg-gray-100 p-1.5 rounded-2xl w-fit">
-        <button 
-          onClick={() => setActiveTab('ROSTER')} 
-          className={cn("px-6 py-2.5 text-sm font-bold rounded-xl transition-all", activeTab === 'ROSTER' ? "bg-white text-brand-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
-        >
-          Class Roster & Grades
-        </button>
-        <button 
-          onClick={() => setActiveTab('ATTENDANCE')} 
-          className={cn("px-6 py-2.5 text-sm font-bold rounded-xl transition-all", activeTab === 'ATTENDANCE' ? "bg-white text-brand-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
-        >
-          Daily Attendance
-        </button>
-        <button 
-          onClick={() => setActiveTab('REPORTS')} 
-          className={cn("px-6 py-2.5 text-sm font-bold rounded-xl transition-all", activeTab === 'REPORTS' ? "bg-white text-brand-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
-        >
-          Report Cards
-        </button>
-      </div>
-
-      {activeTab === 'ROSTER' && (
+      {formMasterActiveTab === 'ROSTER' && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-3xl p-8 border border-gray-100 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-gray-100 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-brand-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" />
           <div className="relative z-10">
-            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Total Enrollments</h3>
-            <div className="text-5xl font-black text-gray-900">20</div>
+            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 sm:mb-3">Total Enrollments</h3>
+            <div className="text-3xl sm:text-5xl font-black text-gray-900">{compiledRoster.length}</div>
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl p-8 border border-gray-100 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-gray-100 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110" />
           <div className="relative z-10">
-            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Missing Scores</h3>
-            <div className="text-5xl font-black text-emerald-500 flex items-center">
-              0 <CheckCircle2 className="ml-3 w-8 h-8 text-emerald-500" />
+            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 sm:mb-3">Missing Scores</h3>
+            <div className="text-3xl sm:text-5xl font-black text-emerald-500 flex items-center">
+              0 <CheckCircle2 className="ml-2 sm:ml-3 w-6 h-6 sm:w-8 sm:h-8 text-emerald-500" />
             </div>
           </div>
         </div>
 
-        <div className={`bg-white rounded-3xl p-8 border border-gray-100 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group ${locked ? 'ring-2 ring-rose-500/20' : ''}`}>
+        <div className={`bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-gray-100 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group ${locked ? 'ring-2 ring-rose-500/20' : ''}`}>
           <div className={`absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110 ${locked ? 'bg-rose-50' : 'bg-gray-50'}`} />
           <div className="relative z-10">
-            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Lock Status</h3>
-            <div className="text-3xl font-black text-gray-900 mt-2">
-              {locked ? <span className="text-rose-600 flex items-center"><Lock className="w-8 h-8 mr-3" /> LOCKED</span> : <span className="text-emerald-600 flex items-center"><ShieldCheck className="w-8 h-8 mr-3" /> OPEN</span>}
+            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 sm:mb-3">Lock Status</h3>
+            <div className="text-2xl sm:text-3xl font-black text-gray-900 mt-1 sm:mt-2">
+              {locked ? <span className="text-rose-600 flex items-center"><Lock className="w-6 h-6 sm:w-8 sm:h-8 mr-2" /> LOCKED</span> : <span className="text-emerald-600 flex items-center"><ShieldCheck className="w-6 h-6 sm:w-8 sm:h-8 mr-2" /> OPEN</span>}
             </div>
           </div>
         </div>
@@ -459,12 +447,19 @@ export function FormMasterView() {
         </>
       )}
 
-      {activeTab === 'ATTENDANCE' && (
+      {formMasterActiveTab === 'ATTENDANCE' && (
         <FormMasterAttendanceView />
       )}
 
-      {activeTab === 'REPORTS' && (
+      {formMasterActiveTab === 'BROADSHEET' && (
+        <BroadsheetMasterTab section={lockedClass.name.startsWith('Primary') || lockedClass.name.startsWith('Nursery') ? 'PRIMARY' : 'SECONDARY'} />
+      )}
+
+      {formMasterActiveTab === 'REPORTS' && (
         <BatchReportCardExporter 
+          hideClassSelect={true}
+          classId={lockedClass.id}
+          termId={activeTermId}
           section={lockedClass.name.startsWith('Primary') || lockedClass.name.startsWith('Nursery') ? 'PRIMARY' : 'SECONDARY'} 
         />
       )}

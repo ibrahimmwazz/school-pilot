@@ -189,103 +189,103 @@ export function TeacherGradingTab() {
   if (activeAssignment) {
     return (
       <div className="space-y-6">
-        <button onClick={() => setActiveAssignment(null)} className="flex items-center text-gray-500 hover:text-gray-900 font-bold transition-colors">
-          <ArrowLeft className="w-5 h-5 mr-2" /> Back to Dashboard
+        <button onClick={() => setActiveAssignment(null)} className="flex items-center text-gray-500 hover:text-gray-900 font-bold text-sm transition-colors">
+          <ArrowLeft className="w-5 h-5 mr-1.5" /> Back to Dashboard
         </button>
         
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-black text-gray-900 tracking-tight">{activeAssignment.subject.name}</h1>
-            <p className="text-gray-500 font-bold uppercase tracking-widest mt-2 text-sm">{activeAssignment.class.name} • First Term 2026/2027</p>
+            <h1 className="text-2xl sm:text-4xl font-black text-gray-900 tracking-tight">{activeAssignment.subject.name}</h1>
+            <p className="text-gray-500 font-bold uppercase tracking-widest mt-1 text-xs sm:text-sm">{activeAssignment.class.name} • First Term 2026/2027</p>
           </div>
           
-          <div className="flex items-center space-x-4">
-            <div className={`flex items-center px-4 py-2 rounded-full font-bold text-sm shadow-sm border ${isOnline ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'}`}>
-              {isOnline ? <><Cloud className="w-4 h-4 mr-2" /> Online</> : <><CloudOff className="w-4 h-4 mr-2" /> Offline Mode</>}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+            <div className={`flex items-center px-3 py-1.5 rounded-xl font-bold text-xs shadow-sm border ${isOnline ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'}`}>
+              {isOnline ? <><Cloud className="w-3.5 h-3.5 mr-1.5" /> Online</> : <><CloudOff className="w-3.5 h-3.5 mr-1.5" /> Offline</>}
             </div>
-            <button onClick={handleSync} disabled={!isOnline || pendingCount === 0 || isFinalized} className="btn-primary flex items-center shadow-lg shadow-brand-500/20 disabled:opacity-50">
-              <UploadCloud className="w-5 h-5 mr-2" /> Sync {pendingCount > 0 && <span className="ml-2 bg-white/20 px-2 py-0.5 rounded-full text-xs">{pendingCount}</span>}
+            <button onClick={handleSync} disabled={!isOnline || pendingCount === 0 || isFinalized} className="btn-primary flex items-center shadow-lg shadow-brand-500/20 disabled:opacity-50 text-xs sm:text-sm py-2 px-3 sm:px-4">
+              <UploadCloud className="w-4 h-4 mr-1.5" /> Sync {pendingCount > 0 && <span className="ml-1.5 bg-white/20 px-1.5 py-0.2 rounded-full text-[10px]">{pendingCount}</span>}
             </button>
-            <button onClick={handleFinalPush} disabled={!isOnline || pendingCount > 0 || isFinalized || roster.length === 0} className={`flex items-center font-black py-2 px-4 rounded-xl text-white shadow-lg ${isFinalized ? 'bg-gray-400 opacity-50 cursor-not-allowed' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/20'}`}>
-              <Save className="w-5 h-5 mr-2" /> {isFinalized ? 'Submitted' : 'Final Push'}
+            <button onClick={handleFinalPush} disabled={!isOnline || pendingCount > 0 || isFinalized || roster.length === 0} className={`flex items-center font-black py-2 px-3.5 sm:px-4 rounded-xl text-white text-xs sm:text-sm shadow-lg ${isFinalized ? 'bg-gray-400 opacity-50 cursor-not-allowed' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/20'}`}>
+              <Save className="w-4 h-4 mr-1.5" /> {isFinalized ? 'Submitted' : 'Final Push'}
             </button>
           </div>
         </div>
 
-        <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+        <div className="flex justify-between items-center bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-gray-100">
           <input 
             type="text" 
-            placeholder="Search student name or ID..." 
+            placeholder="Search student name or admission number..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full max-w-sm px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+            className="w-full max-w-sm px-3 sm:px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
           />
         </div>
 
         {syncMessage && (
-          <div className="p-4 rounded-xl bg-brand-50 text-brand-800 text-sm font-bold border border-brand-200 shadow-sm flex items-center">
-            <FileCheck2 className="w-5 h-5 mr-3 text-brand-500" />
+          <div className="p-3.5 rounded-xl bg-brand-50 text-brand-800 text-xs sm:text-sm font-bold border border-brand-200 shadow-sm flex items-center">
+            <FileCheck2 className="w-4 h-4 mr-2 text-brand-500 shrink-0" />
             {syncMessage}
           </div>
         )}
 
-        <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+        <div className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <div className="overflow-x-auto touch-scroll">
+            <table className="w-full text-left border-collapse min-w-[620px]">
               <thead>
-                <tr className="bg-gray-50/80 border-b border-gray-100">
-                  <th className="py-5 px-8 font-black text-gray-400 text-xs uppercase tracking-widest">Student Name</th>
-                  <th className="py-5 px-2 font-black text-gray-400 text-xs uppercase tracking-widest text-center w-32">
-                    <div className="flex flex-col items-center gap-2">
+                <tr className="bg-gray-50/90 backdrop-blur border-b border-gray-100">
+                  <th className="py-4 px-4 sm:px-6 font-black text-gray-500 text-xs uppercase tracking-widest sticky left-0 bg-gray-50/95 z-20 shadow-[2px_0_5px_rgba(0,0,0,0.03)] min-w-[140px] sm:min-w-[180px]">Student Name</th>
+                  <th className="py-4 px-2 font-black text-gray-500 text-xs uppercase tracking-widest text-center w-24 sm:w-28">
+                    <div className="flex flex-col items-center gap-1">
                       <span>CA 1</span>
-                      <input type="number" value={ca1Max} onChange={e => setCa1Max(Number(e.target.value))} className="w-16 text-center py-1 bg-white border border-gray-200 rounded-md text-gray-900 focus:ring-2 focus:ring-brand-500" />
+                      <input type="number" value={ca1Max} onChange={e => setCa1Max(Number(e.target.value))} className="w-14 text-center py-0.5 bg-white border border-gray-200 rounded-md text-xs font-bold text-gray-900 focus:ring-1 focus:ring-brand-500" />
                     </div>
                   </th>
-                  <th className="py-5 px-2 font-black text-gray-400 text-xs uppercase tracking-widest text-center w-32">
-                    <div className="flex flex-col items-center gap-2">
+                  <th className="py-4 px-2 font-black text-gray-500 text-xs uppercase tracking-widest text-center w-24 sm:w-28">
+                    <div className="flex flex-col items-center gap-1">
                       <span>CA 2</span>
-                      <input type="number" value={ca2Max} onChange={e => setCa2Max(Number(e.target.value))} className="w-16 text-center py-1 bg-white border border-gray-200 rounded-md text-gray-900 focus:ring-2 focus:ring-brand-500" />
+                      <input type="number" value={ca2Max} onChange={e => setCa2Max(Number(e.target.value))} className="w-14 text-center py-0.5 bg-white border border-gray-200 rounded-md text-xs font-bold text-gray-900 focus:ring-1 focus:ring-brand-500" />
                     </div>
                   </th>
-                  <th className="py-5 px-2 font-black text-gray-400 text-xs uppercase tracking-widest text-center w-32">
-                    <div className="flex flex-col items-center gap-2">
+                  <th className="py-4 px-2 font-black text-gray-500 text-xs uppercase tracking-widest text-center w-24 sm:w-28">
+                    <div className="flex flex-col items-center gap-1">
                       <span>CA 3</span>
-                      <input type="number" value={ca3Max} onChange={e => setCa3Max(Number(e.target.value))} className="w-16 text-center py-1 bg-white border border-gray-200 rounded-md text-gray-900 focus:ring-2 focus:ring-brand-500" />
+                      <input type="number" value={ca3Max} onChange={e => setCa3Max(Number(e.target.value))} className="w-14 text-center py-0.5 bg-white border border-gray-200 rounded-md text-xs font-bold text-gray-900 focus:ring-1 focus:ring-brand-500" />
                     </div>
                   </th>
-                  <th className="py-5 px-2 font-black text-gray-400 text-xs uppercase tracking-widest text-center w-32">
-                    <div className="flex flex-col items-center gap-2">
+                  <th className="py-4 px-2 font-black text-gray-500 text-xs uppercase tracking-widest text-center w-24 sm:w-28">
+                    <div className="flex flex-col items-center gap-1">
                       <span>Exam</span>
-                      <input type="number" value={examMax} onChange={e => setExamMax(Number(e.target.value))} className="w-16 text-center py-1 bg-white border border-gray-200 rounded-md text-gray-900 focus:ring-2 focus:ring-brand-500" />
+                      <input type="number" value={examMax} onChange={e => setExamMax(Number(e.target.value))} className="w-14 text-center py-0.5 bg-white border border-gray-200 rounded-md text-xs font-bold text-gray-900 focus:ring-1 focus:ring-brand-500" />
                     </div>
                   </th>
-                  <th className="py-5 px-8 font-black text-brand-600 text-xs uppercase tracking-widest text-center w-32">Total</th>
-                  <th className="py-5 px-8 font-black text-brand-600 text-xs uppercase tracking-widest text-center w-32">Grade</th>
+                  <th className="py-4 px-4 font-black text-brand-600 text-xs uppercase tracking-widest text-center w-20">Total</th>
+                  <th className="py-4 px-4 font-black text-brand-600 text-xs uppercase tracking-widest text-center w-20">Grade</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {roster.filter(student => student.name.toLowerCase().includes(searchQuery.toLowerCase()) || student.admissionNumber.toLowerCase().includes(searchQuery.toLowerCase())).map((student, idx) => (
                   <tr key={student.id} className="hover:bg-gray-50/50 transition-colors group">
-                    <td className="py-5 px-8">
-                      <div className="font-bold text-gray-900 text-base">{student.name}</div>
-                      <div className="text-xs text-gray-400 font-bold mt-1 tracking-wider">{student.admissionNumber}</div>
+                    <td className="py-3 sm:py-4 px-4 sm:px-6 sticky left-0 bg-white z-10 shadow-[2px_0_5px_rgba(0,0,0,0.03)]">
+                      <div className="font-bold text-gray-900 text-xs sm:text-sm truncate max-w-[140px] sm:max-w-[180px]">{student.name}</div>
+                      <div className="text-[10px] sm:text-xs text-gray-400 font-mono font-bold mt-0.5 tracking-wider">{student.admissionNumber}</div>
                     </td>
-                    <td className="py-5 px-6 text-center">
-                      <input type="number" max={ca1Max} value={student.ca1} onChange={e => handleScoreChange(student.id, 'ca1', e.target.value)} onBlur={() => handleSaveToDexie(student.id)} className="w-full text-center py-2 bg-gray-50 border-2 border-gray-200 focus:bg-white rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-bold text-gray-900 transition-all placeholder:text-gray-300 disabled:opacity-50" placeholder="-" disabled={ca1Max === 0 || isFinalized} />
+                    <td className="py-3 sm:py-4 px-2 sm:px-3 text-center">
+                      <input type="number" max={ca1Max} value={student.ca1} onChange={e => handleScoreChange(student.id, 'ca1', e.target.value)} onBlur={() => handleSaveToDexie(student.id)} className="w-full text-center py-1.5 bg-gray-50 border border-gray-200 focus:bg-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-brand-500 font-bold text-xs sm:text-sm text-gray-900 transition-all placeholder:text-gray-300 disabled:opacity-50" placeholder="-" disabled={ca1Max === 0 || isFinalized} />
                     </td>
-                    <td className="py-5 px-6 text-center">
-                      <input type="number" max={ca2Max} value={student.ca2} onChange={e => handleScoreChange(student.id, 'ca2', e.target.value)} onBlur={() => handleSaveToDexie(student.id)} className="w-full text-center py-2 bg-gray-50 border-2 border-gray-200 focus:bg-white rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-bold text-gray-900 transition-all placeholder:text-gray-300 disabled:opacity-50" placeholder="-" disabled={ca2Max === 0 || isFinalized} />
+                    <td className="py-3 sm:py-4 px-2 sm:px-3 text-center">
+                      <input type="number" max={ca2Max} value={student.ca2} onChange={e => handleScoreChange(student.id, 'ca2', e.target.value)} onBlur={() => handleSaveToDexie(student.id)} className="w-full text-center py-1.5 bg-gray-50 border border-gray-200 focus:bg-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-brand-500 font-bold text-xs sm:text-sm text-gray-900 transition-all placeholder:text-gray-300 disabled:opacity-50" placeholder="-" disabled={ca2Max === 0 || isFinalized} />
                     </td>
-                    <td className="py-5 px-6 text-center">
-                      <input type="number" max={ca3Max} value={student.ca3} onChange={e => handleScoreChange(student.id, 'ca3', e.target.value)} onBlur={() => handleSaveToDexie(student.id)} className="w-full text-center py-2 bg-gray-50 border-2 border-gray-200 focus:bg-white rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-bold text-gray-900 transition-all placeholder:text-gray-300 disabled:opacity-50" placeholder="-" disabled={ca3Max === 0 || isFinalized} />
+                    <td className="py-3 sm:py-4 px-2 sm:px-3 text-center">
+                      <input type="number" max={ca3Max} value={student.ca3} onChange={e => handleScoreChange(student.id, 'ca3', e.target.value)} onBlur={() => handleSaveToDexie(student.id)} className="w-full text-center py-1.5 bg-gray-50 border border-gray-200 focus:bg-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-brand-500 font-bold text-xs sm:text-sm text-gray-900 transition-all placeholder:text-gray-300 disabled:opacity-50" placeholder="-" disabled={ca3Max === 0 || isFinalized} />
                     </td>
-                    <td className="py-5 px-6 text-center">
-                      <input type="number" max={examMax} value={student.exam} onChange={e => handleScoreChange(student.id, 'exam', e.target.value)} onBlur={() => handleSaveToDexie(student.id)} className="w-full text-center py-2 bg-gray-50 border-2 border-gray-200 focus:bg-white rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 font-bold text-gray-900 transition-all placeholder:text-gray-300 disabled:opacity-50" placeholder="-" disabled={isFinalized} />
+                    <td className="py-3 sm:py-4 px-2 sm:px-3 text-center">
+                      <input type="number" max={examMax} value={student.exam} onChange={e => handleScoreChange(student.id, 'exam', e.target.value)} onBlur={() => handleSaveToDexie(student.id)} className="w-full text-center py-1.5 bg-gray-50 border border-gray-200 focus:bg-white rounded-lg sm:rounded-xl focus:ring-1 focus:ring-brand-500 font-bold text-xs sm:text-sm text-gray-900 transition-all placeholder:text-gray-300 disabled:opacity-50" placeholder="-" disabled={isFinalized} />
                     </td>
-                    <td className="py-5 px-6 text-center">
-                      <div className="font-black text-brand-600 text-lg">{student.total !== undefined ? student.total : '-'}</div>
+                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-center">
+                      <div className="font-black text-brand-600 text-sm sm:text-base">{student.total !== undefined ? student.total : '-'}</div>
                     </td>
-                    <td className="py-5 px-6 text-center">
+                    <td className="py-3 sm:py-4 px-2 sm:px-4 text-center">
                       <div className={`font-black text-lg ${
                         student.grade === 'A' ? 'text-emerald-500' :
                         student.grade === 'B' ? 'text-blue-500' :

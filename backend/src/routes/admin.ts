@@ -886,4 +886,204 @@ router.get('/stats', async (req: AuthRequest, res) => {
   }
 });
 
+router.post('/assign-form-master', auditLog('ADMIN_ASSIGN_FORM_MASTER'), async (req: AuthRequest, res) => {
+  try {
+    const schoolId = req.user?.schoolId;
+    if (!schoolId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const { staffId, classId } = req.body;
+    if (!staffId || !classId) {
+      return res.status(400).json({ message: 'Staff ID and Class ID are required' });
+    }
+
+    const activeTerm = await prisma.academicTerm.findFirst({
+      where: { schoolId, isActive: true }
+    });
+
+    if (!activeTerm) {
+      return res.status(400).json({ message: 'No active term found' });
+    }
+
+    const staffExists = await prisma.user.findFirst({
+      where: { id: staffId, schoolId }
+    });
+    const classExists = await prisma.class.findFirst({
+      where: { id: classId, schoolId }
+    });
+
+    if (!staffExists || !classExists) {
+      return res.status(400).json({ message: 'Invalid Staff ID or Class ID' });
+    }
+
+    const assignment = await prisma.$transaction(async (tx) => {
+      // First check if there is an existing form master for this class
+      const existing = await tx.formMasterAssignment.findFirst({
+        where: { classId, academicTermId: activeTerm.id }
+      });
+
+      if (existing) {
+        // Update the existing assignment
+        await tx.formMasterAssignment.update({
+          where: { id: existing.id },
+          data: { staffId }
+        });
+      } else {
+        // Create new assignment
+        await tx.formMasterAssignment.create({
+          data: { classId, staffId, academicTermId: activeTerm.id }
+        });
+      }
+
+      // Ensure the user role is updated to FORM_MASTER if they were just a TEACHER
+      const user = await tx.user.findUnique({ where: { id: staffId } });
+      if (user && user.role === 'TEACHER') {
+        await tx.user.update({
+          where: { id: staffId },
+          data: { role: 'FORM_MASTER' }
+        });
+      }
+
+      return true;
+    });
+
+    res.json({ message: 'Form master assigned successfully' });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ message: error.message || 'Server error' });
+  }
+});
+
+// Academic Head: View Class Broadsheet
+router.get('/broadsheet/:classId/:termId', async (req: AuthRequest, res) => {
+  try {
+    const schoolId = req.user?.schoolId;
+    if (!schoolId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const { classId, termId } = req.params;
+
+    const classRecord = await prisma.class.findFirst({
+      where: { id: classId, schoolId }
+    });
+    if (!classRecord) return res.status(404).json({ message: 'Class not found in your school' });
+
+    const { FormMasterService } = await import('../services/form-master.service');
+    const broadsheet = await FormMasterService.compileScores(classId, termId);
+
+    const lock = await prisma.classLock.findUnique({
+      where: { classId_academicTermId: { classId, academicTermId: termId } }
+    });
+
+    res.json({
+      ...broadsheet,
+      classInfo: classRecord,
+      isLocked: lock?.isLocked || false,
+      lockedAt: lock?.lockedAt || null
+    });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ message: error.message || 'Server error' });
+  }
+});
+
+// Academic Head: Approve & Finalize Broadsheet
+router.post('/broadsheet/approve', auditLog('ADMIN_APPROVE_BROADSHEET'), async (req: AuthRequest, res) => {
+  try {
+    const schoolId = req.user?.schoolId;
+    if (!schoolId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const { classId, termId } = req.body;
+    if (!classId || !termId) return res.status(400).json({ message: 'Class ID and Term ID are required' });
+
+    const classRecord = await prisma.class.findFirst({
+      where: { id: classId, schoolId }
+    });
+    if (!classRecord) return res.status(404).json({ message: 'Class not found in your school' });
+
+    const { FormMasterService } = await import('../services/form-master.service');
+    const lock = await FormMasterService.lockClass(classId, termId, req.user!.id);
+
+    // Finalize all scores for enrollments in this class
+    await prisma.score.updateMany({
+      where: {
+        enrollment: {
+          classId,
+          academicTermId: termId
+        }
+      },
+      data: {
+        approvalStatus: 'FINALIZED'
+      }
+    });
+
+    res.json({ message: 'Broadsheet approved and finalized successfully', lock });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ message: error.message || 'Server error' });
+  }
+});
+
+// Academic Head: View Curriculum / Scheme of Work Progress Logs across Teachers
+router.get('/curriculum/logs', async (req: AuthRequest, res) => {
+  try {
+    const schoolId = req.user?.schoolId;
+    if (!schoolId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const activeTerm = await prisma.academicTerm.findFirst({
+      where: { schoolId, isActive: true }
+    });
+
+    if (!activeTerm) return res.json({ plans: [], stats: { total: 0, approved: 0, submitted: 0, draft: 0 } });
+
+    const plans = await prisma.lessonPlan.findMany({
+      where: { schoolId, academicTermId: activeTerm.id },
+      include: {
+        teacher: { include: { staffProfile: true } },
+        class: true,
+        subject: true
+      },
+      orderBy: [{ weekNumber: 'asc' }, { createdAt: 'desc' }]
+    });
+
+    const total = plans.length;
+    const approved = plans.filter(p => p.status === 'FINALIZED').length;
+    const submitted = plans.filter(p => p.status === 'SUBMITTED').length;
+    const draft = plans.filter(p => p.status === 'DRAFT').length;
+
+    res.json({
+      plans,
+      stats: { total, approved, submitted, draft, coveragePercentage: total > 0 ? Math.round((approved / total) * 100) : 0 }
+    });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ message: error.message || 'Server error' });
+  }
+});
+
+// Academic Head: Approve / Request Revision on Scheme of Work
+router.post('/curriculum/review', auditLog('ADMIN_REVIEW_CURRICULUM'), async (req: AuthRequest, res) => {
+  try {
+    const schoolId = req.user?.schoolId;
+    if (!schoolId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const { planId, status } = req.body;
+    if (!planId || !status) return res.status(400).json({ message: 'Plan ID and status are required' });
+
+    const plan = await prisma.lessonPlan.findFirst({
+      where: { id: planId, schoolId }
+    });
+    if (!plan) return res.status(404).json({ message: 'Curriculum plan not found' });
+
+    const updated = await prisma.lessonPlan.update({
+      where: { id: planId },
+      data: { status: status === 'APPROVED' ? 'FINALIZED' : 'DRAFT' },
+      include: { teacher: { include: { staffProfile: true } }, class: true, subject: true }
+    });
+
+    res.json({ message: `Curriculum plan status updated to ${status}`, plan: updated });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ message: error.message || 'Server error' });
+  }
+});
+
 export default router;

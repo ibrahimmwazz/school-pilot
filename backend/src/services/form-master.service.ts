@@ -73,13 +73,77 @@ export class FormMasterService {
         anomalies.push({ type: 'INCOMPLETE_SUBMISSIONS', studentId: enrollment.student.id });
       }
 
+      const validScores = mergedScores.filter((s: any) => s && s.totalScore !== null && s.totalScore !== undefined && s.approvalStatus !== 'MISSING');
+      const totalMarks = validScores.reduce((sum: number, s: any) => sum + (Number(s?.totalScore) || 0), 0);
+      const subjectCount = validScores.length > 0 ? validScores.length : (expectedSubjects.length || 1);
+      const averageScore = Number((totalMarks / subjectCount).toFixed(1));
+
       enrollments.push({
         ...enrollment,
-        scores: mergedScores
+        scores: mergedScores,
+        totalMarks,
+        averageScore,
+        subjectCount: validScores.length,
+        positionRank: 0,
+        positionOrdinal: ''
       });
     }
 
-    return { enrollments, anomalies };
+    // 4. Compute Class Position Rankings (Dense Ranking with Tie Handling)
+    enrollments.sort((a, b) => b.totalMarks - a.totalMarks);
+
+    const getOrdinal = (n: number) => {
+      const s = ["th", "st", "nd", "rd"];
+      const v = n % 100;
+      return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    };
+
+    let currentRank = 1;
+    for (let i = 0; i < enrollments.length; i++) {
+      if (i > 0 && enrollments[i].totalMarks < enrollments[i - 1].totalMarks) {
+        currentRank = i + 1;
+      }
+      enrollments[i].positionRank = currentRank;
+      enrollments[i].positionOrdinal = getOrdinal(currentRank);
+    }
+
+    // 5. Compute Class Broad statistics
+    const classTotalAverages = enrollments.map(e => e.averageScore);
+    const classAverage = classTotalAverages.length > 0 ? 
+      Number((classTotalAverages.reduce((a, b) => a + b, 0) / classTotalAverages.length).toFixed(1)) : 0;
+    const highestAverage = classTotalAverages.length > 0 ? Math.max(...classTotalAverages) : 0;
+    const lowestAverage = classTotalAverages.length > 0 ? Math.min(...classTotalAverages) : 0;
+
+    // Subject statistics
+    const subjectStats: Record<string, { name: string; average: number; highest: number; lowest: number }> = {};
+    for (const sub of expectedSubjects) {
+      const subScores = enrollments
+        .map(e => e.scores.find((s: any) => s.subjectId === sub.id))
+        .filter((s: any) => s && s.totalScore !== null && s.totalScore !== undefined && s.approvalStatus !== 'MISSING')
+        .map((s: any) => Number(s.totalScore));
+
+      if (subScores.length > 0) {
+        subjectStats[sub.id] = {
+          name: sub.name,
+          average: Number((subScores.reduce((a, b) => a + b, 0) / subScores.length).toFixed(1)),
+          highest: Math.max(...subScores),
+          lowest: Math.min(...subScores)
+        };
+      }
+    }
+
+    return { 
+      enrollments, 
+      anomalies, 
+      expectedSubjects,
+      broadsheetSummary: {
+        totalStudents: enrollments.length,
+        classAverage,
+        highestAverage,
+        lowestAverage,
+        subjectStats
+      }
+    };
   }
 
   static async lockClass(classId: string, termId: string, userId: string) {

@@ -3,6 +3,7 @@ import { FormMasterService } from '../services/form-master.service';
 import prisma from '../services/db';
 import { AuthRequest, requireAuth } from '../middlewares/auth';
 import { CommunicationsService } from '../services/communications.service';
+import bcrypt from 'bcrypt';
 
 const router = Router();
 router.use(requireAuth);
@@ -205,6 +206,81 @@ router.post('/evaluation', async (req: AuthRequest, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.post('/students', async (req: AuthRequest, res) => {
+  try {
+    const schoolId = req.user?.schoolId;
+    if (!schoolId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const { firstName, lastName, admissionNumber, dateOfBirth, gender, classId } = req.body;
+
+    if (!firstName || !lastName || !admissionNumber || !classId) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const activeTerm = await prisma.academicTerm.findFirst({
+      where: { schoolId, isActive: true }
+    });
+
+    if (!activeTerm) {
+      return res.status(400).json({ message: 'No active term found' });
+    }
+
+    const assignment = await prisma.formMasterAssignment.findFirst({
+      where: {
+        staffId: req.user!.id,
+        academicTermId: activeTerm.id,
+        classId
+      }
+    });
+
+    if (!assignment && req.user!.role !== 'ADMIN' && req.user!.role !== 'PRINCIPAL') {
+      return res.status(403).json({ message: 'Forbidden: You are not the Form Master for this class' });
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      const student = await tx.student.create({
+        data: {
+          schoolId,
+          firstName,
+          lastName,
+          admissionNumber,
+          dateOfBirth: new Date(dateOfBirth || '2010-01-01'),
+          gender: gender || 'MALE',
+          section: classId.includes('Primary') ? 'Primary' : 'Secondary',
+        }
+      });
+
+      if (activeTerm) {
+        const enrollment = await tx.enrollment.create({
+          data: { studentId: student.id, classId, academicTermId: activeTerm.id }
+        });
+        await tx.studentTermRecord.create({ data: { enrollmentId: enrollment.id } });
+      }
+
+      const hashedPwd = await bcrypt.hash('password123', 10);
+      await tx.user.create({
+        data: {
+          schoolId,
+          email: `${admissionNumber.replace(/[^a-zA-Z0-9]/g, '')}@student.school.edu`,
+          passwordHash: hashedPwd,
+          role: 'STUDENT',
+          identityId: student.id
+        }
+      });
+
+      return student;
+    });
+
+    res.json({ message: 'Student registered successfully', student: result });
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      const target = error.meta?.target;
+      return res.status(409).json({ message: `A student with this ${target} already exists.` });
+    }
+    res.status(500).json({ message: error.message || 'Server error' });
   }
 });
 

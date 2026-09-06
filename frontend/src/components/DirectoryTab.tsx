@@ -32,6 +32,7 @@ export function DirectoryTab({ section, searchQuery = '' }: { section: 'PRIMARY'
       const res = await fetch(`/api/admin/classes/directory?section=${section}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
+      if (!res.ok) throw new Error('Failed to fetch classes');
       const data = await res.json();
       if (Array.isArray(data)) {
         setClasses(data);
@@ -49,6 +50,7 @@ export function DirectoryTab({ section, searchQuery = '' }: { section: 'PRIMARY'
       const res = await fetch(`/api/admin/staff/directory?section=${section}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
+      if (!res.ok) throw new Error('Failed to fetch staff');
       const data = await res.json();
       if (Array.isArray(data)) {
         setStaff(data);
@@ -66,14 +68,40 @@ export function DirectoryTab({ section, searchQuery = '' }: { section: 'PRIMARY'
       const res = await fetch(`/api/admin/classes/${classId}/students`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
+      if (!res.ok) throw new Error('Failed to fetch students');
       const data = await res.json();
-      if (Array.isArray(data)) {
-        setStudents(data);
-      }
-    } catch (err) {
-      console.error(err);
+      setStudents(data.students);
+    } catch (e) {
+      console.error(e);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [assignClassId, setAssignClassId] = useState('');
+
+  const assignFormMaster = async () => {
+    if (!selectedStaff || !assignClassId) return;
+    setIsAssigning(true);
+    try {
+      const res = await fetch('/api/admin/assign-form-master', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ staffId: selectedStaff.user?.id, classId: assignClassId })
+      });
+      if (res.ok) {
+        alert('Form Master assigned successfully!');
+        setAssignClassId('');
+        fetchStaff();
+      } else {
+        alert('Failed to assign form master.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error assigning form master');
+    } finally {
+      setIsAssigning(false);
     }
   };
 
@@ -268,6 +296,30 @@ export function DirectoryTab({ section, searchQuery = '' }: { section: 'PRIMARY'
                     <p className="text-sm text-gray-500 font-bold py-4 text-center bg-gray-50 rounded-xl">No active subject/class assignments found.</p>
                   )}
                 </div>
+
+                {/* Form Master Assignment */}
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-4 shadow-sm">
+                  <h4 className="text-lg font-black text-gray-900 flex items-center border-b pb-3"><Users className="w-5 h-5 mr-2 text-brand-600" /> Assign Form Master</h4>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <select 
+                      value={assignClassId} 
+                      onChange={(e) => setAssignClassId(e.target.value)}
+                      className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 font-bold text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                    >
+                      <option value="">Select a Class to assign...</option>
+                      {classes.map(c => (
+                        <option key={c.id} value={c.id}>{c.name} {c.arm}</option>
+                      ))}
+                    </select>
+                    <button 
+                      disabled={isAssigning || !assignClassId}
+                      onClick={assignFormMaster}
+                      className="px-6 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-50"
+                    >
+                      {isAssigning ? 'Assigning...' : 'Assign Class'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -298,44 +350,50 @@ export function DirectoryTab({ section, searchQuery = '' }: { section: 'PRIMARY'
                   <h3 className="text-lg font-black text-gray-900 tracking-tight">{level}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {armsList.map(arm => {
-                    const matchedClass = findMatchingClass(level, arm) || classes.find(c => (c.name || '').includes(level) && (c.arm || '').includes(arm));
-                    const studentCount = matchedClass ? (matchedClass._count?.enrollments ?? 0) : 0;
-                    
-                    return (
-                      <div 
-                        key={arm}
-                        onClick={() => {
-                          if (matchedClass) {
-                            handleClassClick(matchedClass);
-                          } else {
-                            // If exact match wasn't found, find any class starting with level
-                            const fallback = classes.find(c => (c.name || '').replace(/\s+/g, '').toLowerCase().includes(level.replace(/\s+/g, '').toLowerCase()));
-                            if (fallback) handleClassClick(fallback);
-                          }
-                        }}
-                        className={cn(
-                          "p-5 rounded-2xl border transition-all flex flex-col justify-between cursor-pointer group",
-                          matchedClass 
-                            ? "bg-brand-50/40 border-brand-200 hover:shadow-lg hover:border-brand-500 hover:bg-brand-50" 
-                            : "bg-gray-50/50 border-gray-200 hover:border-brand-400 hover:bg-gray-50"
-                        )}
-                      >
-                        <div className="flex justify-between items-start mb-3">
-                          <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm transition-colors", matchedClass ? "bg-brand-100 text-brand-600 group-hover:bg-brand-600 group-hover:text-white" : "bg-gray-200 text-gray-600 group-hover:bg-brand-500 group-hover:text-white")}>
-                            {arm}
+                  {(() => {
+                    const levelKey = normalizeLevelKey(level);
+                    const levelClasses = classes.filter(c => {
+                      const cLevelKey = normalizeLevelKey(c.name);
+                      return cLevelKey === levelKey || cLevelKey.startsWith(levelKey);
+                    });
+
+                    if (levelClasses.length === 0) {
+                      return <div className="col-span-3 py-4 text-center text-sm font-bold text-gray-400 bg-gray-50 rounded-2xl border border-dashed border-gray-200">No classes registered for {level}</div>;
+                    }
+
+                    return levelClasses.map(matchedClass => {
+                      const arm = matchedClass.arm || '';
+                      const studentCount = matchedClass._count?.enrollments ?? 0;
+                      
+                      return (
+                        <div 
+                          key={matchedClass.id}
+                          onClick={() => handleClassClick(matchedClass)}
+                          className={cn(
+                            "p-5 rounded-2xl border transition-all flex flex-col justify-between cursor-pointer group bg-brand-50/40 border-brand-200 hover:shadow-lg hover:border-brand-500 hover:bg-brand-50"
+                          )}
+                        >
+                          <div className="flex justify-between items-start mb-6">
+                            <div>
+                              <h4 className={cn("text-2xl font-black transition-colors text-brand-600")}>
+                                Arm {arm || 'General'}
+                              </h4>
+                              <p className={cn("text-xs font-bold mt-1 uppercase tracking-wider text-brand-600/70")}>
+                                {matchedClass.name} {arm}
+                              </p>
+                            </div>
+                            <ChevronRight className={cn("w-5 h-5 transition-transform group-hover:translate-x-1 text-brand-500")} />
                           </div>
-                          <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-brand-500" />
+                          <div className="flex items-center space-x-2">
+                            <Users className={cn("w-4 h-4 text-brand-500")} />
+                            <span className={cn("text-sm font-bold text-brand-600")}>
+                              {studentCount} Students
+                            </span>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-black text-gray-900 text-base">{level} {arm}</h4>
-                          <p className="text-xs font-bold text-gray-500 mt-1">
-                            {studentCount} Students Enrolled
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    });
+                  })()}
                 </div>
               </div>
             ))}
@@ -379,27 +437,36 @@ export function DirectoryTab({ section, searchQuery = '' }: { section: 'PRIMARY'
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center text-gray-500 font-bold">No students found matching your search.</td>
                 </tr>
-              ) : filteredStudents.map((st) => (
-                <tr 
-                  key={st.id} 
-                  onClick={() => fetchStudentProfile(st.id)}
-                  className="hover:bg-brand-50 cursor-pointer transition-colors group"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-sm group-hover:bg-brand-100 group-hover:text-brand-600 transition-colors">
-                        {(st.firstName?.[0] || 'S')}{(st.lastName?.[0] || 'T')}
+              ) : filteredStudents.map((st) => {
+                const isActive = st.status === 'ACTIVE';
+                const statusColor = isActive 
+                  ? "bg-emerald-100 text-emerald-700" 
+                  : st.status === 'TRANSFERRED' 
+                    ? "bg-amber-100 text-amber-700"
+                    : "bg-rose-100 text-rose-700";
+
+                return (
+                  <tr 
+                    key={st.id} 
+                    onClick={() => fetchStudentProfile(st.id)}
+                    className="hover:bg-brand-50 cursor-pointer transition-colors group"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center font-bold text-sm group-hover:bg-brand-100 group-hover:text-brand-600 transition-colors">
+                          {(st.firstName?.[0] || 'S')}{(st.lastName?.[0] || 'T')}
+                        </div>
+                        <div className="font-bold text-gray-900">{st.lastName}, {st.firstName} {st.middleName || ''}</div>
                       </div>
-                      <div className="font-bold text-gray-900">{st.lastName}, {st.firstName} {st.middleName || ''}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-gray-600 font-medium">{st.admissionNumber}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-gray-600 font-medium">{st.gender}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-700">{st.status}</span>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-600 font-medium">{st.admissionNumber}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-600 font-medium">{st.gender}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={cn("px-2.5 py-1 text-xs font-bold rounded-full", statusColor)}>{st.status}</span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

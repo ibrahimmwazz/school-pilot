@@ -17,12 +17,20 @@ export class ScoreService {
       select: { reportTemplateConfig: true },
     });
 
-    const config = school.reportTemplateConfig as any;
-    const gradingScale = config?.grading_scale || [
-      { min: 75, max: 100, grade: "A" },
-      { min: 60, max: 74, grade: "B" },
-      { min: 50, max: 59, grade: "C" },
-      { min: 0, max: 49, grade: "F" }
+    const config = (school.reportTemplateConfig as any) || {};
+    const assessmentStructure = config.assessment_structure || {
+      ca1: { name: 'CA 1 (Homework/Tests)', max: 15, weight: 15 },
+      ca2: { name: 'CA 2 (Mid-Term Test)', max: 15, weight: 15 },
+      ca3: { name: 'CA 3 (Project/Attendance)', max: 10, weight: 10 },
+      exam: { name: 'Final Examination', max: 60, weight: 60 }
+    };
+
+    const gradingScale = config.grading_scale || [
+      { min: 75, max: 100, grade: "A", remark: "Excellent" },
+      { min: 65, max: 74, grade: "B", remark: "Very Good" },
+      { min: 50, max: 64, grade: "C", remark: "Good" },
+      { min: 40, max: 49, grade: "D", remark: "Pass" },
+      { min: 0, max: 39, grade: "F", remark: "Fail" }
     ];
 
     const results: any[] = [];

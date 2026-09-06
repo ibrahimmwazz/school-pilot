@@ -53,70 +53,117 @@
     </div>
   </header>
 
-  <!-- Student Info -->
-  <section class="grid grid-cols-2 gap-8 mb-10 bg-slate-50 p-6 rounded-2xl border border-slate-100">
+  <!-- Student Info & Class Summary Grid -->
+  <section class="grid grid-cols-4 gap-4 mb-6 bg-slate-50 p-5 rounded-2xl border border-slate-100">
     <div>
-      <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Student Name</p>
-      <p class="text-xl font-black text-slate-900">{{studentName}}</p>
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Student Name</p>
+      <p class="text-base font-black text-slate-900">{{studentName}}</p>
     </div>
     <div>
-      <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Admission Number</p>
-      <p class="text-xl font-black text-slate-900">{{admissionNumber}}</p>
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Admission Number</p>
+      <p class="text-base font-black text-slate-900">{{admissionNumber}}</p>
     </div>
     <div>
-      <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Class</p>
-      <p class="text-xl font-black text-slate-900">{{className}}</p>
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Class / Arm</p>
+      <p class="text-base font-black text-slate-900">{{className}}</p>
     </div>
     <div>
-      <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Attendance</p>
-      <p class="text-xl font-black text-slate-900">{{daysPresent}} <span class="text-sm text-slate-500">/ {{daysOpened}} days</span></p>
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Class Position</p>
+      <p class="text-base font-black brand-text">{{positionOrdinal}} <span class="text-xs text-slate-400 font-bold">/ {{totalInClass}}</span></p>
+    </div>
+    <div class="pt-2 border-t border-slate-200">
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Score</p>
+      <p class="text-base font-black text-slate-900">{{totalMarks}}</p>
+    </div>
+    <div class="pt-2 border-t border-slate-200">
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Student Average</p>
+      <p class="text-base font-black text-slate-900">{{averageScore}}%</p>
+    </div>
+    <div class="pt-2 border-t border-slate-200">
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Class Average</p>
+      <p class="text-base font-black text-slate-900">{{classAverage}}%</p>
+    </div>
+    <div class="pt-2 border-t border-slate-200">
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Attendance</p>
+      <p class="text-base font-black text-slate-900">{{daysPresent}} <span class="text-xs text-slate-400 font-bold">/ {{daysOpened}} days</span></p>
     </div>
   </section>
 
   {{#isPaid hasPaidFees}}
   <!-- Academic Record -->
-  <section class="mb-10 flex-1">
-    <h3 class="text-lg font-black text-slate-900 border-b-2 border-slate-200 pb-2 mb-4 uppercase tracking-widest">Academic Performance</h3>
-    <table class="w-full text-left border-collapse">
+  <section class="mb-6 flex-1">
+    <h3 class="text-xs font-black text-slate-900 border-b-2 border-slate-200 pb-1 mb-3 uppercase tracking-widest">Academic Subject Performance</h3>
+    <table class="w-full text-left border-collapse text-xs">
       <thead>
         <tr class="brand-bg-light border-b-2 brand-border">
-          <th class="py-3 px-4 font-black brand-text text-xs uppercase w-1/3">Subject</th>
-          <th class="py-3 px-4 font-black brand-text text-xs uppercase text-center">CA 1 (20)</th>
-          <th class="py-3 px-4 font-black brand-text text-xs uppercase text-center">CA 2 (20)</th>
-          <th class="py-3 px-4 font-black brand-text text-xs uppercase text-center">Exam (60)</th>
-          <th class="py-3 px-4 font-black brand-text text-xs uppercase text-center">Total (100)</th>
-          <th class="py-3 px-4 font-black brand-text text-xs uppercase text-center">Grade</th>
+          <th class="py-2.5 px-3 font-black brand-text uppercase w-1/3">Subject</th>
+          <th class="py-2.5 px-3 font-black brand-text uppercase text-center">CA 1 (15)</th>
+          <th class="py-2.5 px-3 font-black brand-text uppercase text-center">CA 2 (15)</th>
+          <th class="py-2.5 px-3 font-black brand-text uppercase text-center">CA 3 (10)</th>
+          <th class="py-2.5 px-3 font-black brand-text uppercase text-center">Exam (60)</th>
+          <th class="py-2.5 px-3 font-black brand-text uppercase text-center">Total (100)</th>
+          <th class="py-2.5 px-3 font-black brand-text uppercase text-center">Grade</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100">
         {{#each scores}}
         <tr>
-          <td class="py-3 px-4 font-bold text-slate-700">{{subject}}</td>
-          <td class="py-3 px-4 text-center font-medium">{{ca1}}</td>
-          <td class="py-3 px-4 text-center font-medium">{{ca2}}</td>
-          <td class="py-3 px-4 text-center font-medium">{{exam}}</td>
-          <td class="py-3 px-4 text-center font-black text-slate-900">{{totalScore}}</td>
-          <td class="py-3 px-4 text-center font-black {{#if (eq gradingLetter 'F')}}text-rose-500{{else}}brand-text{{/if}}">{{gradingLetter}}</td>
+          <td class="py-2 px-3 font-bold text-slate-800">{{subject}}</td>
+          <td class="py-2 px-3 text-center font-medium text-slate-600">{{ca1}}</td>
+          <td class="py-2 px-3 text-center font-medium text-slate-600">{{ca2}}</td>
+          <td class="py-2 px-3 text-center font-medium text-slate-600">{{ca3}}</td>
+          <td class="py-2 px-3 text-center font-medium text-slate-600">{{exam}}</td>
+          <td class="py-2 px-3 text-center font-black text-slate-900">{{totalScore}}</td>
+          <td class="py-2 px-3 text-center font-black {{#if (eq gradingLetter 'F')}}text-rose-500{{else}}brand-text{{/if}}">{{gradingLetter}}</td>
         </tr>
         {{/each}}
       </tbody>
     </table>
   </section>
 
-  <!-- Psychomotor & Remarks -->
-  <section class="grid grid-cols-2 gap-8 mb-10">
+  <!-- Affective & Psychomotor Traits and Remarks -->
+  <section class="grid grid-cols-2 gap-6 mb-6">
+    <!-- Affective & Behavioral Domain -->
     <div>
-      <h3 class="text-lg font-black text-slate-900 border-b-2 border-slate-200 pb-2 mb-4 uppercase tracking-widest">Psychomotor Skills (1-5)</h3>
-      <div class="space-y-3">
-        <div class="flex justify-between items-center"><span class="font-bold text-slate-600">Punctuality</span><span class="font-black bg-slate-100 px-3 py-1 rounded-lg">{{punctuality}}</span></div>
-        <div class="flex justify-between items-center"><span class="font-bold text-slate-600">Neatness</span><span class="font-black bg-slate-100 px-3 py-1 rounded-lg">{{neatness}}</span></div>
-        <div class="flex justify-between items-center"><span class="font-bold text-slate-600">Teamwork</span><span class="font-black bg-slate-100 px-3 py-1 rounded-lg">{{teamwork}}</span></div>
+      <h3 class="text-xs font-black text-slate-900 border-b-2 border-slate-200 pb-1 mb-2 uppercase tracking-widest">Behavioral & Psychomotor Ratings (1-5)</h3>
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg"><span class="font-bold text-slate-600">Punctuality</span><span class="font-black brand-text bg-white px-2 py-0.5 rounded border border-slate-200">{{punctuality}}/5</span></div>
+        <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg"><span class="font-bold text-slate-600">Neatness</span><span class="font-black brand-text bg-white px-2 py-0.5 rounded border border-slate-200">{{neatness}}/5</span></div>
+        <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg"><span class="font-bold text-slate-600">Teamwork</span><span class="font-black brand-text bg-white px-2 py-0.5 rounded border border-slate-200">{{teamwork}}/5</span></div>
+        <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg"><span class="font-bold text-slate-600">Attentiveness</span><span class="font-black brand-text bg-white px-2 py-0.5 rounded border border-slate-200">5/5</span></div>
       </div>
     </div>
+
+    <!-- Form Master Remark -->
     <div>
-      <h3 class="text-lg font-black text-slate-900 border-b-2 border-slate-200 pb-2 mb-4 uppercase tracking-widest">Form Master's Remark</h3>
-      <div class="bg-teal-50 border border-teal-100 rounded-xl p-6 italic font-medium text-slate-700 leading-relaxed min-h-[120px]">
+      <h3 class="text-xs font-black text-slate-900 border-b-2 border-slate-200 pb-1 mb-2 uppercase tracking-widest">Form Master's Remark</h3>
+      <div class="bg-teal-50 border border-teal-100 rounded-xl p-3 italic text-xs font-medium text-slate-700 min-h-[70px]">
         "{{remark}}"
+      </div>
+    </div>
+  </section>
+
+  <!-- Principal's Appraisal & Signature Block -->
+  <section class="grid grid-cols-2 gap-6 mb-4 pt-2 border-t-2 border-slate-200">
+    <div>
+      <h3 class="text-xs font-black text-slate-900 mb-1 uppercase tracking-widest">Principal's Final Remark</h3>
+      <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-xs font-medium text-slate-800">
+        {{principalRemark}}
+      </div>
+    </div>
+    
+    <div class="flex justify-around items-center border border-slate-100 bg-slate-50 rounded-xl p-3">
+      <!-- Digital Signature -->
+      <div class="text-center">
+        <div class="h-10 flex items-center justify-center font-serif italic font-black text-slate-800 border-b border-slate-300 px-4">
+          {{principalSignatureName}}
+        </div>
+        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Principal's Signature</p>
+      </div>
+
+      <!-- Stamp Seal -->
+      <div class="w-14 h-14 rounded-full border-2 border-dashed border-indigo-300 flex items-center justify-center text-[8px] font-black text-indigo-500 uppercase tracking-tighter text-center leading-tight rotate-[-12deg]">
+        OFFICIAL<br/>SEAL
       </div>
     </div>
   </section>
@@ -131,8 +178,8 @@
   </section>
   {{/isPaid}}
 
-  <footer class="mt-auto border-t-2 border-slate-100 pt-6 flex justify-between items-center text-sm font-bold text-slate-400">
-    <div>Generated automatically by Namu Enterprise</div>
+  <footer class="mt-auto border-t-2 border-slate-100 pt-3 flex justify-between items-center text-[10px] font-bold text-slate-400">
+    <div>Generated automatically by School Management Enterprise Platform</div>
     <div>{{currentDate}}</div>
   </footer>
 </body>

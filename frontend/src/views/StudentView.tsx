@@ -135,30 +135,30 @@ export function StudentView() {
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
       {/* Student Profile Header Banner */}
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 gap-6">
-        <div className="flex items-center space-x-6">
-          <div className="w-20 h-20 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center font-black text-3xl shadow-inner shrink-0">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 gap-4 sm:gap-6">
+        <div className="flex items-center space-x-4 sm:space-x-6">
+          <div className="w-14 h-14 sm:w-20 sm:h-20 bg-brand-100 text-brand-600 rounded-2xl sm:rounded-full flex items-center justify-center font-black text-xl sm:text-3xl shadow-inner shrink-0">
             {data.firstName[0]}{data.lastName[0]}
           </div>
           <div>
-            <h1 className="text-3xl font-black text-gray-900 tracking-tight">{data.firstName} {data.lastName}</h1>
-            <div className="flex flex-wrap space-x-3 mt-2">
-              <span className="text-gray-500 font-bold bg-gray-100 px-3.5 py-1 rounded-full text-sm">{data.admissionNumber}</span>
-              <span className="text-brand-600 font-bold bg-brand-50 px-3.5 py-1 rounded-full text-sm">{classNameTitle}</span>
+            <h1 className="text-xl sm:text-3xl font-black text-gray-900 tracking-tight">{data.firstName} {data.lastName}</h1>
+            <div className="flex flex-wrap gap-2 mt-1.5 sm:mt-2">
+              <span className="text-gray-500 font-bold bg-gray-100 px-3 py-0.5 rounded-full text-xs sm:text-sm">{data.admissionNumber}</span>
+              <span className="text-brand-600 font-bold bg-brand-50 px-3 py-0.5 rounded-full text-xs sm:text-sm">{classNameTitle}</span>
             </div>
           </div>
         </div>
 
-        <div className="text-left sm:text-right">
-          <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-1">Academic Term</p>
-          <p className="text-xl font-black text-gray-900">{activeEnrollment?.academicTerm?.year || '2026/2027'} First Term</p>
+        <div className="text-left sm:text-right w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">Academic Term</p>
+          <p className="text-sm sm:text-xl font-black text-gray-900">{activeEnrollment?.academicTerm?.year || '2026/2027'} First Term</p>
         </div>
       </header>
 
       {activeTab === 'OVERVIEW' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {/* Left Column: Financial Status & Report Card */}
           <div className="space-y-8">
             <div className="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col items-center text-center">

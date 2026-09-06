@@ -41,23 +41,23 @@ export function LoginView({ onLogin }: LoginViewProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <div className="min-h-[100dvh] bg-slate-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
       {/* Background gradients */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-brand-400/20 blur-3xl" />
         <div className="absolute -bottom-[40%] -right-[20%] w-[70%] h-[70%] rounded-full bg-blue-400/20 blur-3xl" />
       </div>
 
-      <div className="w-full max-w-md relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
-        <div className="glass-panel p-8 md:p-10 bg-white/90 shadow-2xl shadow-brand-500/10">
-          <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-tr from-brand-600 to-brand-400 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/30 mb-6">
-              <School className="w-8 h-8 text-white" />
+      <div className="w-full max-w-md relative z-10 animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out my-auto">
+        <div className="glass-panel p-6 sm:p-10 bg-white/90 shadow-2xl shadow-brand-500/10 rounded-2xl sm:rounded-3xl">
+          <div className="flex flex-col items-center mb-6 sm:mb-8">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-tr from-brand-600 to-brand-400 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/30 mb-4 sm:mb-6">
+              <School className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
             </div>
-            <h1 className="text-3xl font-black text-gray-900 tracking-tight text-center">
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight text-center">
               Welcome back
             </h1>
-            <p className="text-sm text-gray-500 mt-2 font-medium text-center">
+            <p className="text-xs sm:text-sm text-gray-500 mt-1.5 sm:mt-2 font-medium text-center">
               Sign in to your School account
             </p>
           </div>

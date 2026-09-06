@@ -13,42 +13,43 @@ export function ParentView() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Linked Children Dependents
-    setTimeout(() => {
-      setDependents([
-        {
-          id: 'NMS/2026/001',
-          firstName: 'Ibrahim',
-          lastName: 'Student',
-          className: 'JSS 1 A',
-          section: 'Secondary',
-          attendance: '98.5%',
-          feesStatus: 'CLEARED',
-          guardianPhone: '+234 803 123 4567',
-          grades: [
-            { subject: 'Mathematics', ca1: 14, ca2: 15, exam: 68, total: 97, grade: 'A' },
-            { subject: 'English Language', ca1: 12, ca2: 14, exam: 62, total: 88, grade: 'A' },
-            { subject: 'Basic Science', ca1: 13, ca2: 13, exam: 58, total: 84, grade: 'A' },
-          ]
-        },
-        {
-          id: 'PRM/2026/042',
-          firstName: 'Fatima',
-          lastName: 'Bukar',
-          className: 'Primary 5 B',
-          section: 'Primary',
-          attendance: '96.2%',
-          feesStatus: 'PENDING',
-          guardianPhone: '+234 803 123 4567',
-          grades: [
-            { subject: 'Mathematics', ca1: 15, ca2: 15, exam: 61, total: 91, grade: 'A' },
-            { subject: 'English Language', ca1: 14, ca2: 14, exam: 60, total: 88, grade: 'A' },
-            { subject: 'Basic Science', ca1: 11, ca2: 13, exam: 52, total: 76, grade: 'B' },
-          ]
+    fetch('/api/student/parent/dependents', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    })
+      .then(async res => {
+        if (!res.ok) throw new Error('Failed to load dependents');
+        return res.json();
+      })
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setDependents(data);
+        } else {
+          // Default demo data if no students enrolled yet
+          setDependents([
+            {
+              id: 'NMS/2026/001',
+              firstName: 'Ibrahim',
+              lastName: 'Student',
+              className: 'JSS 1 A',
+              section: 'Secondary',
+              attendance: '98.5%',
+              feesStatus: 'CLEARED',
+              guardianPhone: '+234 803 123 4567',
+              grades: [
+                { subject: 'Mathematics', ca1: 14, ca2: 15, exam: 68, total: 97, grade: 'A' },
+                { subject: 'English Language', ca1: 12, ca2: 14, exam: 62, total: 88, grade: 'A' },
+                { subject: 'Basic Science', ca1: 13, ca2: 13, exam: 58, total: 84, grade: 'A' },
+              ]
+            }
+          ]);
         }
-      ]);
-      setIsLoading(false);
-    }, 500);
+      })
+      .catch(err => {
+        console.error(err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, []);
 
   const [showReceiptModal, setShowReceiptModal] = useState(false);
@@ -91,23 +92,23 @@ export function ParentView() {
       </div>
 
       {/* Multi-Child Selector Switcher Bar */}
-      <div className="bg-white p-2 rounded-3xl border border-gray-100 shadow-sm flex items-center space-x-3 overflow-x-auto">
-        <span className="text-xs font-black text-gray-400 uppercase tracking-widest px-4">Switch Dependent Child:</span>
+      <div className="bg-white p-2 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm flex items-center space-x-2 sm:space-x-3 overflow-x-auto no-scrollbar touch-scroll">
+        <span className="text-[10px] sm:text-xs font-black text-gray-400 uppercase tracking-widest px-3 sm:px-4 shrink-0">Switch Child:</span>
         {dependents.map((dep, index) => (
           <button
             key={dep.id}
             onClick={() => setActiveChildIndex(index)}
             className={cn(
-              "flex items-center space-x-3 px-5 py-3 rounded-2xl text-sm font-bold transition-all shrink-0",
+              "flex items-center space-x-2 sm:space-x-3 px-3.5 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold transition-all shrink-0",
               activeChildIndex === index
                 ? "bg-brand-600 text-white shadow-md shadow-brand-500/20 scale-[1.02]"
                 : "bg-gray-50 text-gray-600 hover:bg-gray-100"
             )}
           >
-            <div className={cn("w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs", activeChildIndex === index ? "bg-white/20 text-white" : "bg-brand-100 text-brand-700")}>
+            <div className={cn("w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl flex items-center justify-center font-black text-xs", activeChildIndex === index ? "bg-white/20 text-white" : "bg-brand-100 text-brand-700")}>
               {dep.firstName[0]}
             </div>
-            <span>{dep.firstName} ({dep.className})</span>
+            <span className="whitespace-nowrap">{dep.firstName} ({dep.className})</span>
           </button>
         ))}
       </div>
@@ -117,29 +118,29 @@ export function ParentView() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Summary Card */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-6">
+            <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-gray-100 shadow-sm space-y-6">
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600 to-brand-400 text-white flex items-center justify-center text-2xl font-black shadow-md">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-brand-600 to-brand-400 text-white flex items-center justify-center text-xl sm:text-2xl font-black shadow-md shrink-0">
                   {currentChild.firstName[0]}
                 </div>
-                <div>
-                  <h2 className="text-2xl font-black text-gray-900">{currentChild.firstName} {currentChild.lastName}</h2>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{currentChild.id} • {currentChild.className}</p>
+                <div className="min-w-0">
+                  <h2 className="text-xl sm:text-2xl font-black text-gray-900 truncate">{currentChild.firstName} {currentChild.lastName}</h2>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider truncate">{currentChild.id} • {currentChild.className}</p>
                 </div>
               </div>
 
               <div className="space-y-3 pt-4 border-t border-gray-100">
-                <div className="flex justify-between items-center text-sm font-bold">
+                <div className="flex justify-between items-center text-xs sm:text-sm font-bold">
                   <span className="text-gray-400">Attendance Record</span>
                   <span className="text-emerald-600 font-black">{currentChild.attendance}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-sm font-bold">
+                <div className="flex justify-between items-center text-xs sm:text-sm font-bold">
                   <span className="text-gray-400">Fee Status</span>
                   {currentChild.feesStatus === 'CLEARED' ? (
-                    <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-black">CLEARED</span>
+                    <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-black">CLEARED</span>
                   ) : (
-                    <span className="px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-black">OWING</span>
+                    <span className="px-2.5 py-0.5 bg-rose-100 text-rose-700 rounded-full text-xs font-black">OWING</span>
                   )}
                 </div>
 
@@ -156,14 +157,14 @@ export function ParentView() {
             </div>
 
             {/* Quick Report Download Card */}
-            <div className="bg-gradient-to-br from-brand-600 to-brand-800 rounded-3xl p-8 text-white shadow-lg space-y-4">
-              <h3 className="text-lg font-black">Official Report Card PDF</h3>
+            <div className="bg-gradient-to-br from-brand-600 to-brand-800 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-white shadow-lg space-y-4">
+              <h3 className="text-base sm:text-lg font-black">Official Report Card PDF</h3>
               <p className="text-xs text-brand-100 font-medium">Download terminal academic performance report for {currentChild.firstName}.</p>
               <a
                 href="http://localhost:4000/reports/pilot-report.pdf"
                 target="_blank"
                 rel="noreferrer"
-                className="w-full bg-white text-brand-700 font-bold text-xs py-3 px-4 rounded-2xl flex items-center justify-center shadow-sm hover:bg-brand-50 transition-all"
+                className="w-full bg-white text-brand-700 font-bold text-xs py-2.5 sm:py-3 px-4 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm hover:bg-brand-50 transition-all"
               >
                 <Download className="w-4 h-4 mr-2" /> Download PDF Report Sheet
               </a>
@@ -171,31 +172,31 @@ export function ParentView() {
           </div>
 
           {/* Right Grades Breakdown Table */}
-          <div className="lg:col-span-2 bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-6">
-            <h3 className="text-xl font-black text-gray-900">Academic Assessment Roster</h3>
+          <div className="lg:col-span-2 bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-gray-100 shadow-sm space-y-6">
+            <h3 className="text-lg sm:text-xl font-black text-gray-900">Academic Assessment Roster</h3>
             
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
+            <div className="overflow-x-auto touch-scroll">
+              <table className="w-full text-left min-w-[500px]">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
-                    <th className="px-4 py-3 text-xs font-black text-gray-400 uppercase">Subject</th>
-                    <th className="px-4 py-3 text-xs font-black text-gray-400 uppercase">CA 1 (15)</th>
-                    <th className="px-4 py-3 text-xs font-black text-gray-400 uppercase">CA 2 (15)</th>
-                    <th className="px-4 py-3 text-xs font-black text-gray-400 uppercase">Exam (70)</th>
-                    <th className="px-4 py-3 text-xs font-black text-gray-400 uppercase">Total</th>
-                    <th className="px-4 py-3 text-xs font-black text-gray-400 uppercase">Grade</th>
+                    <th className="px-3 sm:px-4 py-3 text-xs font-black text-gray-400 uppercase">Subject</th>
+                    <th className="px-3 sm:px-4 py-3 text-xs font-black text-gray-400 uppercase">CA 1 (15)</th>
+                    <th className="px-3 sm:px-4 py-3 text-xs font-black text-gray-400 uppercase">CA 2 (15)</th>
+                    <th className="px-3 sm:px-4 py-3 text-xs font-black text-gray-400 uppercase">Exam (70)</th>
+                    <th className="px-3 sm:px-4 py-3 text-xs font-black text-gray-400 uppercase">Total</th>
+                    <th className="px-3 sm:px-4 py-3 text-xs font-black text-gray-400 uppercase">Grade</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50 text-sm font-bold text-gray-800">
+                <tbody className="divide-y divide-gray-50 text-xs sm:text-sm font-bold text-gray-800">
                   {currentChild.grades.map((g: any, i: number) => (
                     <tr key={i} className="hover:bg-gray-50/50">
-                      <td className="px-4 py-3 font-black">{g.subject}</td>
-                      <td className="px-4 py-3 text-gray-500">{g.ca1}</td>
-                      <td className="px-4 py-3 text-gray-500">{g.ca2}</td>
-                      <td className="px-4 py-3 text-gray-500">{g.exam}</td>
-                      <td className="px-4 py-3 text-brand-600 font-black">{g.total}</td>
-                      <td className="px-4 py-3">
-                        <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg text-xs font-black">{g.grade}</span>
+                      <td className="px-3 sm:px-4 py-3 font-black text-gray-900">{g.subject}</td>
+                      <td className="px-3 sm:px-4 py-3 text-gray-500">{g.ca1}</td>
+                      <td className="px-3 sm:px-4 py-3 text-gray-500">{g.ca2}</td>
+                      <td className="px-3 sm:px-4 py-3 text-gray-500">{g.exam}</td>
+                      <td className="px-3 sm:px-4 py-3 text-brand-600 font-black">{g.total}</td>
+                      <td className="px-3 sm:px-4 py-3">
+                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-lg text-xs font-black">{g.grade}</span>
                       </td>
                     </tr>
                   ))}

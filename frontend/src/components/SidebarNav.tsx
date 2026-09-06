@@ -1,12 +1,12 @@
 import React from 'react';
-import { LayoutDashboard, Users, Calendar, MessageSquare, Settings, LogOut, ShieldCheck, School } from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, MessageSquare, Settings, LogOut, ShieldCheck, School, FileSpreadsheet, Layers } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface SidebarNavProps {
   portalTitle: string;
   subtitle: string;
-  activeTab: 'OVERVIEW' | 'DIRECTORY' | 'TIMETABLE' | 'COMMUNICATIONS' | 'SETTINGS';
-  setActiveTab: (tab: 'OVERVIEW' | 'DIRECTORY' | 'TIMETABLE' | 'COMMUNICATIONS' | 'SETTINGS') => void;
+  activeTab: 'OVERVIEW' | 'DIRECTORY' | 'BROADSHEET' | 'CURRICULUM' | 'TIMETABLE' | 'COMMUNICATIONS' | 'SETTINGS';
+  setActiveTab: (tab: any) => void;
   logoUrl?: string;
   primaryColor?: string;
   secondaryColor?: string;
@@ -26,6 +26,8 @@ export function SidebarNav({
   const navItems = [
     { id: 'OVERVIEW', label: 'Overview', icon: LayoutDashboard },
     { id: 'DIRECTORY', label: 'Directory', icon: Users },
+    { id: 'BROADSHEET', label: 'Broadsheet', icon: FileSpreadsheet },
+    { id: 'CURRICULUM', label: 'Curriculum', icon: Layers },
     { id: 'TIMETABLE', label: 'Timetable', icon: Calendar },
     { id: 'COMMUNICATIONS', label: 'Communications', icon: MessageSquare },
     { id: 'SETTINGS', label: 'Settings', icon: Settings },

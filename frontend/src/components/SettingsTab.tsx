@@ -277,6 +277,173 @@ export function SettingsTab({
           </div>
         </div>
       </div>
+
+      {/* 3. FLEXIBLE ASSESSMENT STRUCTURE CONFIGURATOR */}
+      <AssessmentConfigCard />
+    </div>
+  );
+}
+
+function AssessmentConfigCard() {
+  const [ca1Weight, setCa1Weight] = useState(15);
+  const [ca2Weight, setCa2Weight] = useState(15);
+  const [ca3Weight, setCa3Weight] = useState(10);
+  const [examWeight, setExamWeight] = useState(60);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/school/assessment-config', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.assessmentStructure) {
+          setCa1Weight(data.assessmentStructure.ca1?.weight || 15);
+          setCa2Weight(data.assessmentStructure.ca2?.weight || 15);
+          setCa3Weight(data.assessmentStructure.ca3?.weight || 10);
+          setExamWeight(data.assessmentStructure.exam?.weight || 60);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  const total = Number(ca1Weight) + Number(ca2Weight) + Number(ca3Weight) + Number(examWeight);
+
+  const handleSave = async () => {
+    if (total !== 100) {
+      alert(`Total assessment weight must equal exactly 100%. Currently it is ${total}%.`);
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const payload = {
+        assessmentStructure: {
+          ca1: { name: 'CA 1 (Homework/Quizzes)', max: Number(ca1Weight), weight: Number(ca1Weight) },
+          ca2: { name: 'CA 2 (Mid-Term Test)', max: Number(ca2Weight), weight: Number(ca2Weight) },
+          ca3: { name: 'CA 3 (Project/Attendance)', max: Number(ca3Weight), weight: Number(ca3Weight) },
+          exam: { name: 'Final Terminal Examination', max: Number(examWeight), weight: Number(examWeight) }
+        }
+      };
+
+      const res = await fetch('/api/school/assessment-config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error('Failed to update assessment structure');
+
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (e: any) {
+      alert(e.message || 'Error saving assessment configuration');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="glass-panel p-8 space-y-6">
+      <div className="flex items-center space-x-3">
+        <div className="p-3 bg-brand-100 text-brand-600 rounded-2xl">
+          <Sparkles className="w-6 h-6" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">Flexible Assessment Structure & Weights</h2>
+          <p className="text-xs font-semibold text-gray-500">Configure terminal mark distribution across Continuous Assessments (CA) and Final Exams</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-2">
+          <label className="text-xs font-bold text-gray-600 uppercase">CA 1 Weight (Homework/Quiz)</label>
+          <div className="flex items-center space-x-2">
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={ca1Weight}
+              onChange={(e) => setCa1Weight(Number(e.target.value))}
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl font-black text-lg text-gray-900"
+            />
+            <span className="font-black text-gray-400">%</span>
+          </div>
+        </div>
+
+        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-2">
+          <label className="text-xs font-bold text-gray-600 uppercase">CA 2 Weight (Mid-Term Test)</label>
+          <div className="flex items-center space-x-2">
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={ca2Weight}
+              onChange={(e) => setCa2Weight(Number(e.target.value))}
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl font-black text-lg text-gray-900"
+            />
+            <span className="font-black text-gray-400">%</span>
+          </div>
+        </div>
+
+        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-2">
+          <label className="text-xs font-bold text-gray-600 uppercase">CA 3 Weight (Projects/Attendance)</label>
+          <div className="flex items-center space-x-2">
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={ca3Weight}
+              onChange={(e) => setCa3Weight(Number(e.target.value))}
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl font-black text-lg text-gray-900"
+            />
+            <span className="font-black text-gray-400">%</span>
+          </div>
+        </div>
+
+        <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-2">
+          <label className="text-xs font-bold text-gray-600 uppercase">Final Exam Weight</label>
+          <div className="flex items-center space-x-2">
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={examWeight}
+              onChange={(e) => setExamWeight(Number(e.target.value))}
+              className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl font-black text-lg text-gray-900"
+            />
+            <span className="font-black text-gray-400">%</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-gray-100">
+        <div className="flex items-center space-x-2">
+          <span className="text-xs font-bold text-gray-500 uppercase">Total Weight:</span>
+          <span className={cn("text-base font-black px-3 py-1 rounded-full", total === 100 ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700")}>
+            {total}% / 100%
+          </span>
+        </div>
+
+        <div className="flex items-center space-x-3">
+          {saveSuccess && (
+            <span className="text-xs font-bold text-emerald-600 flex items-center">
+              <CheckCircle2 className="w-4 h-4 mr-1" /> Assessment weights saved!
+            </span>
+          )}
+          <button
+            onClick={handleSave}
+            disabled={isSaving || total !== 100}
+            className="btn-primary py-2.5 px-6 text-sm flex items-center shadow-lg shadow-brand-500/20 disabled:opacity-50"
+          >
+            <Save className="w-4 h-4 mr-2" /> Save Assessment Structure
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
