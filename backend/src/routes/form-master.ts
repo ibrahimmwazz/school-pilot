@@ -284,4 +284,42 @@ router.post('/students', async (req: AuthRequest, res) => {
   }
 });
 
+// Batch Report Card PDF Generator
+router.get('/batch/:classId/:termId', async (req: AuthRequest, res) => {
+  try {
+    const schoolId = req.user?.schoolId;
+    if (!schoolId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const { classId, termId } = req.params;
+    const school = await prisma.school.findUnique({ where: { id: schoolId } });
+    if (!school) return res.status(404).json({ message: 'School not found' });
+
+    const compilation = await FormMasterService.compileScores(classId, termId);
+    if (!compilation.enrollments || compilation.enrollments.length === 0) {
+      return res.status(400).json({ message: 'No student enrollments found for this class and term.' });
+    }
+
+    const { PdfEngine } = await import('../services/pdf-engine');
+    const templateConfig = school.reportTemplateConfig || {
+      theme: { primary_color: '#0d9488', secondary_color: '#111827' }
+    };
+
+    await PdfEngine.generateReportsBatch(compilation.enrollments, templateConfig);
+
+    // Return the URL to the first student's PDF or the batch folder index
+    const firstAdm = compilation.enrollments[0]?.student?.admissionNumber?.replace(/[^a-zA-Z0-9]/g, '');
+    const reportUrl = `/api/reports/report-${firstAdm}-${termId}.pdf`;
+
+    res.json({ 
+      success: true, 
+      message: `Generated ${compilation.enrollments.length} terminal report card PDFs successfully.`,
+      url: reportUrl,
+      count: compilation.enrollments.length
+    });
+  } catch (error: any) {
+    console.error('BATCH REPORT GENERATION ERROR:', error);
+    res.status(500).json({ message: error.message || 'Server error generating batch reports' });
+  }
+});
+
 export default router;

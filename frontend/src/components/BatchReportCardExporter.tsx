@@ -35,7 +35,7 @@ export function BatchReportCardExporter({
         throw new Error("Class ID is required to generate reports.");
       }
       
-      const res = await fetch(`/api/reports/batch/${exportClassId}/${termId}`, {
+      const res = await fetch(`/api/form-master/batch/${exportClassId}/${termId}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       if (!res.ok) throw new Error('Failed to generate report');
