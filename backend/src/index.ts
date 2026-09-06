@@ -35,6 +35,46 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 app.use('/api/reports', express.static(path.join(__dirname, '../public/reports')));
 
+// Batch report card generation endpoint under /api/reports/batch
+app.get('/api/reports/batch/:classId/:termId', requireAuth, async (req: any, res: any) => {
+  try {
+    const schoolId = req.user?.schoolId;
+    if (!schoolId) return res.status(401).json({ message: 'Unauthorized' });
+
+    const { classId, termId } = req.params;
+    const { FormMasterService } = await import('./services/form-master.service');
+    const { PdfEngine } = await import('./services/pdf-engine');
+    const prisma = (await import('./services/db')).default;
+
+    const school = await prisma.school.findUnique({ where: { id: schoolId } });
+    if (!school) return res.status(404).json({ message: 'School not found' });
+
+    const compilation = await FormMasterService.compileScores(classId, termId);
+    if (!compilation.enrollments || compilation.enrollments.length === 0) {
+      return res.status(400).json({ message: 'No student enrollments found for this class and term.' });
+    }
+
+    const templateConfig = school.reportTemplateConfig || {
+      theme: { primary_color: '#0d9488', secondary_color: '#111827' }
+    };
+
+    await PdfEngine.generateReportsBatch(compilation.enrollments, templateConfig);
+
+    const firstAdm = compilation.enrollments[0]?.student?.admissionNumber?.replace(/[^a-zA-Z0-9]/g, '');
+    const reportUrl = `/api/reports/report-${firstAdm}-${termId}.pdf`;
+
+    res.json({
+      success: true,
+      message: `Generated ${compilation.enrollments.length} terminal report card PDFs successfully.`,
+      url: reportUrl,
+      count: compilation.enrollments.length
+    });
+  } catch (error: any) {
+    console.error('BATCH REPORT GENERATION ERROR:', error);
+    res.status(500).json({ message: error.message || 'Server error generating batch reports' });
+  }
+});
+
 // Routes
 app.use('/api/auth', authRouter);
 app.use('/api/school', requireAuth, schoolRouter);
