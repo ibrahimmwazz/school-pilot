@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "npx --prefix backend prisma generate && npm run build --workspace=frontend",
+  "buildCommand": "npx --prefix backend prisma generate --schema=backend/prisma/schema.prisma && npm run build --workspace=frontend",
   "outputDirectory": "frontend/dist",
   "rewrites": [
     {

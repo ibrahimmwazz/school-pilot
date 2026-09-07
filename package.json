@@ -6,5 +6,8 @@
     "frontend",
     "backend",
     "shared"
-  ]
+  ],
+  "prisma": {
+    "schema": "backend/prisma/schema.prisma"
+  }
 }
