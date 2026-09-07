@@ -5,6 +5,7 @@ import { cn } from '../lib/utils';
 export function DirectoryTab({ section, searchQuery = '' }: { section: 'PRIMARY' | 'SECONDARY'; searchQuery?: string }) {
   const [directoryMode, setDirectoryMode] = useState<'CLASSES' | 'STAFF'>('CLASSES');
   const [view, setView] = useState<'CLASSES' | 'STUDENTS'>('CLASSES');
+  const [earlyYearsFilter, setEarlyYearsFilter] = useState<'ALL' | 'NURSERY' | 'PRIMARY'>('ALL');
   const [classes, setClasses] = useState<any[]>([]);
   const [staff, setStaff] = useState<any[]>([]);
   const [selectedClass, setSelectedClass] = useState<any>(null);
@@ -70,16 +71,16 @@ export function DirectoryTab({ section, searchQuery = '' }: { section: 'PRIMARY'
       });
       if (!res.ok) throw new Error('Failed to fetch students');
       const data = await res.json();
-      setStudents(data.students);
-    } catch (e) {
-      console.error(e);
+      setStudents(data.students || []);
+    } catch (err) {
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const [isAssigning, setIsAssigning] = useState(false);
   const [assignClassId, setAssignClassId] = useState('');
+  const [isAssigning, setIsAssigning] = useState(false);
 
   const assignFormMaster = async () => {
     if (!selectedStaff || !assignClassId) return;
@@ -87,16 +88,19 @@ export function DirectoryTab({ section, searchQuery = '' }: { section: 'PRIMARY'
     try {
       const res = await fetch('/api/admin/assign-form-master', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-        body: JSON.stringify({ staffId: selectedStaff.user?.id, classId: assignClassId })
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          staffId: selectedStaff.userId || selectedStaff.user?.id || selectedStaff.id,
+          classId: assignClassId
+        })
       });
-      if (res.ok) {
-        alert('Form Master assigned successfully!');
-        setAssignClassId('');
-        fetchStaff();
-      } else {
-        alert('Failed to assign form master.');
-      }
+      if (!res.ok) throw new Error('Failed to assign form master');
+      alert('Assigned Form Master successfully!');
+      setAssignClassId('');
+      fetchStaff();
     } catch (e) {
       console.error(e);
       alert('Error assigning form master');
@@ -124,8 +128,17 @@ export function DirectoryTab({ section, searchQuery = '' }: { section: 'PRIMARY'
     fetchStudents(cls.id);
   };
 
+  const allPrimaryLevels = [
+    'Nursery 1', 'Nursery 2', 'Nursery 3',
+    'Primary 1', 'Primary 2', 'Primary 3', 'Primary 4', 'Primary 5', 'Primary 6'
+  ];
+
   const levelNames = section === 'PRIMARY'
-    ? ['Nursery 1', 'Nursery 2', 'Nursery 3', 'Primary 1', 'Primary 2', 'Primary 3', 'Primary 4', 'Primary 5', 'Primary 6']
+    ? (earlyYearsFilter === 'NURSERY' 
+        ? ['Nursery 1', 'Nursery 2', 'Nursery 3']
+        : earlyYearsFilter === 'PRIMARY'
+        ? ['Primary 1', 'Primary 2', 'Primary 3', 'Primary 4', 'Primary 5', 'Primary 6']
+        : allPrimaryLevels)
     : ['JSS 1', 'JSS 2', 'JSS 3', 'SSS 1', 'SSS 2', 'SSS 3'];
 
   const armsList = ['A', 'B', 'C'];
@@ -331,11 +344,37 @@ export function DirectoryTab({ section, searchQuery = '' }: { section: 'PRIMARY'
   if (view === 'CLASSES') {
     return (
       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center space-x-2 bg-gray-100 p-1 rounded-xl">
-            <button onClick={() => setDirectoryMode('CLASSES')} className={cn("px-4 py-2 text-sm font-bold rounded-lg transition-all", directoryMode === 'CLASSES' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}>Classes</button>
-            <button onClick={() => setDirectoryMode('STAFF')} className={cn("px-4 py-2 text-sm font-bold rounded-lg transition-all", directoryMode === 'STAFF' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}>Staff</button>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center space-x-2 bg-gray-100 p-1 rounded-xl">
+              <button onClick={() => setDirectoryMode('CLASSES')} className={cn("px-4 py-2 text-sm font-bold rounded-lg transition-all", directoryMode === 'CLASSES' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}>Classes</button>
+              <button onClick={() => setDirectoryMode('STAFF')} className={cn("px-4 py-2 text-sm font-bold rounded-lg transition-all", directoryMode === 'STAFF' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700")}>Staff</button>
+            </div>
+
+            {section === 'PRIMARY' && (
+              <div className="flex items-center space-x-1.5 bg-gray-100 p-1 rounded-xl">
+                <button 
+                  onClick={() => setEarlyYearsFilter('ALL')} 
+                  className={cn("px-3 py-1.5 text-xs font-black rounded-lg transition-all", earlyYearsFilter === 'ALL' ? "bg-white text-brand-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+                >
+                  All Classes (9)
+                </button>
+                <button 
+                  onClick={() => setEarlyYearsFilter('NURSERY')} 
+                  className={cn("px-3 py-1.5 text-xs font-black rounded-lg transition-all", earlyYearsFilter === 'NURSERY' ? "bg-white text-rose-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+                >
+                  Nursery Section (3 Levels)
+                </button>
+                <button 
+                  onClick={() => setEarlyYearsFilter('PRIMARY')} 
+                  className={cn("px-3 py-1.5 text-xs font-black rounded-lg transition-all", earlyYearsFilter === 'PRIMARY' ? "bg-white text-emerald-600 shadow-sm" : "text-gray-500 hover:text-gray-700")}
+                >
+                  Primary Section (6 Levels)
+                </button>
+              </div>
+            )}
           </div>
+
           <button onClick={fetchClasses} className="text-sm font-bold text-brand-600 hover:text-brand-700">Refresh</button>
         </div>
         {isLoading ? (

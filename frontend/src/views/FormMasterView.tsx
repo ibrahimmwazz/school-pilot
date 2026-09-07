@@ -18,7 +18,7 @@ export function FormMasterView() {
   const [lockedClass, setLockedClass] = useState<any | null>(null);
   const [isLoadingClass, setIsLoadingClass] = useState(true);
   const [metadata, setMetadata] = useState({ classes: [], subjects: [] });
-  const [activeSection, setActiveSection] = useState<'NONE' | 'PRIMARY' | 'SECONDARY' | 'SECONDARY_JSS' | 'SECONDARY_SSS'>('NONE');
+  const [activeSection, setActiveSection] = useState<'NONE' | 'NURSERY' | 'PRIMARY' | 'SECONDARY' | 'SECONDARY_JSS' | 'SECONDARY_SSS'>('NONE');
   const [selectedClassIdToLock, setSelectedClassIdToLock] = useState<string>('');
 
   const [newStudent, setNewStudent] = useState({
@@ -199,13 +199,32 @@ export function FormMasterView() {
 
           {activeSection === 'NONE' && (
             <div className="space-y-4">
+              <button onClick={() => setActiveSection('NURSERY')} className="w-full text-left p-6 bg-gray-50 hover:bg-brand-50 border-2 border-transparent hover:border-brand-500 rounded-2xl transition-all">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-black text-xl text-gray-900">Nursery Section</h3>
+                    <p className="text-sm text-gray-500 font-medium">Nursery 1, 2, 3 (Early Childhood Education)</p>
+                  </div>
+                  <span className="px-3 py-1 bg-rose-100 text-rose-700 rounded-xl text-xs font-black uppercase tracking-wider">Arms A, B, C</span>
+                </div>
+              </button>
               <button onClick={() => setActiveSection('PRIMARY')} className="w-full text-left p-6 bg-gray-50 hover:bg-brand-50 border-2 border-transparent hover:border-brand-500 rounded-2xl transition-all">
-                <h3 className="font-black text-xl text-gray-900">Primary Section</h3>
-                <p className="text-sm text-gray-500 font-medium">Primary 1 - 6</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-black text-xl text-gray-900">Primary Section</h3>
+                    <p className="text-sm text-gray-500 font-medium">Primary 1 - 6 (Basic Education)</p>
+                  </div>
+                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-xl text-xs font-black uppercase tracking-wider">Arms A, B, C</span>
+                </div>
               </button>
               <button onClick={() => setActiveSection('SECONDARY')} className="w-full text-left p-6 bg-gray-50 hover:bg-brand-50 border-2 border-transparent hover:border-brand-500 rounded-2xl transition-all">
-                <h3 className="font-black text-xl text-gray-900">Secondary Section</h3>
-                <p className="text-sm text-gray-500 font-medium">JSS & SSS</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-black text-xl text-gray-900">Secondary Section</h3>
+                    <p className="text-sm text-gray-500 font-medium">Junior (JSS 1-3) & Senior (SSS 1-3)</p>
+                  </div>
+                  <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-xl text-xs font-black uppercase tracking-wider">Arms A, B, C</span>
+                </div>
               </button>
             </div>
           )}
@@ -214,21 +233,22 @@ export function FormMasterView() {
             <div className="space-y-4">
               <button onClick={() => setActiveSection('SECONDARY_JSS')} className="w-full text-left p-6 bg-gray-50 hover:bg-brand-50 border-2 border-transparent hover:border-brand-500 rounded-2xl transition-all">
                 <h3 className="font-black text-xl text-gray-900">Junior Secondary (JSS)</h3>
-                <p className="text-sm text-gray-500 font-medium">JSS 1 - 3</p>
+                <p className="text-sm text-gray-500 font-medium">JSS 1 - 3 (Arms A, B, C)</p>
               </button>
               <button onClick={() => setActiveSection('SECONDARY_SSS')} className="w-full text-left p-6 bg-gray-50 hover:bg-brand-50 border-2 border-transparent hover:border-brand-500 rounded-2xl transition-all">
                 <h3 className="font-black text-xl text-gray-900">Senior Secondary (SSS)</h3>
-                <p className="text-sm text-gray-500 font-medium">SSS 1 - 3</p>
+                <p className="text-sm text-gray-500 font-medium">SSS 1 - 3 (Arms A, B, C)</p>
               </button>
             </div>
           )}
 
-          {(activeSection === 'PRIMARY' || activeSection === 'SECONDARY_JSS' || activeSection === 'SECONDARY_SSS') && (
+          {(activeSection === 'NURSERY' || activeSection === 'PRIMARY' || activeSection === 'SECONDARY_JSS' || activeSection === 'SECONDARY_SSS') && (
             <form onSubmit={handleRegisterClassGate} className="space-y-6">
               <div className="space-y-3">
                 {Object.entries(
                   metadata.classes.filter((c: any) => {
-                    if (activeSection === 'PRIMARY') return c.name.startsWith('Primary');
+                    if (activeSection === 'NURSERY') return c.name.startsWith('Nursery') || c.name.startsWith('Nur') || c.name.startsWith('KG');
+                    if (activeSection === 'PRIMARY') return c.name.startsWith('Primary') || c.name.startsWith('Basic') || c.name.startsWith('Grade');
                     if (activeSection === 'SECONDARY_JSS') return c.name.startsWith('JSS');
                     if (activeSection === 'SECONDARY_SSS') return c.name.startsWith('SSS');
                     return false;
