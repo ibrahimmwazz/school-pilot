@@ -306,14 +306,17 @@ router.get('/batch/:classId/:termId', async (req: AuthRequest, res) => {
 
     await PdfEngine.generateReportsBatch(compilation.enrollments, templateConfig);
 
-    // Return the URL to the first student's PDF or the batch folder index
+    // Return the URL to the first student's report card preview
+    const firstStudentId = compilation.enrollments[0]?.student?.id;
     const firstAdm = compilation.enrollments[0]?.student?.admissionNumber?.replace(/[^a-zA-Z0-9]/g, '');
+    const viewUrl = `/api/reports/view/${firstStudentId || firstAdm}/${termId}`;
     const reportUrl = `/api/reports/report-${firstAdm}-${termId}.pdf`;
 
     res.json({ 
       success: true, 
       message: `Generated ${compilation.enrollments.length} terminal report card PDFs successfully.`,
-      url: reportUrl,
+      url: viewUrl,
+      pdfUrl: reportUrl,
       count: compilation.enrollments.length
     });
   } catch (error: any) {

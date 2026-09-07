@@ -372,23 +372,14 @@ export function FormMasterView() {
                       </div>
                     </td>
                     <td className="py-4 px-6 text-right">
-                      {locked ? (
-                        <a 
-                          href={`/api/reports/report-${enrollment.student?.admissionNumber?.replace(/[^a-zA-Z0-9]/g, '')}-${activeTermId}.pdf`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="bg-brand-600 hover:bg-brand-700 text-white font-black py-2 px-5 rounded-xl transition-all inline-flex items-center shadow-lg shadow-brand-500/20"
-                        >
-                          <Download className="w-4 h-4 mr-2" /> Download PDF
-                        </a>
-                      ) : (
-                        <button 
-                          onClick={() => setSelectedStudentForReport(enrollment)}
-                          className="bg-brand-50 hover:bg-brand-600 text-brand-600 hover:text-white font-black py-2 px-5 rounded-xl transition-all border border-brand-200 hover:border-brand-600 inline-flex items-center"
-                        >
-                          <FileText className="w-4 h-4 mr-2" /> View Temp Report
-                        </button>
-                      )}
+                      <a 
+                        href={`/api/reports/view/${enrollment.studentId || enrollment.id}/${activeTermId}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="bg-brand-600 hover:bg-brand-700 text-white font-black py-2 px-5 rounded-xl transition-all inline-flex items-center shadow-lg shadow-brand-500/20"
+                      >
+                        <Printer className="w-4 h-4 mr-2" /> View & Print
+                      </a>
                     </td>
                   </tr>
                 );

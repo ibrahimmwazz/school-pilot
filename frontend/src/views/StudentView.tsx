@@ -191,8 +191,13 @@ export function StudentView() {
                 hasPaid ? (
                   <div>
                     <p className="text-brand-100 text-sm font-medium mb-6">Your results have been published and are ready for download.</p>
-                    <a href={`http://localhost:4000/reports/pilot-report.pdf`} target="_blank" rel="noreferrer" className="w-full bg-white text-brand-600 font-black py-3 px-6 rounded-2xl hover:bg-brand-50 flex items-center justify-center transition-all">
-                      <Download className="w-5 h-5 mr-2" /> Download PDF Report
+                    <a 
+                      href={`/api/reports/view/${data?.id || activeEnrollment?.studentId}/${activeEnrollment?.academicTermId}`} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="w-full bg-white text-brand-600 font-black py-3 px-6 rounded-2xl hover:bg-brand-50 flex items-center justify-center transition-all shadow-md"
+                    >
+                      <Printer className="w-5 h-5 mr-2" /> View & Print Official Report
                     </a>
                   </div>
                 ) : (
@@ -201,7 +206,7 @@ export function StudentView() {
                       <AlertTriangle className="w-4 h-4 mr-2" /> Results are withheld due to pending fees.
                     </p>
                     <button disabled className="w-full bg-white/20 text-white font-black py-3 px-6 rounded-2xl opacity-50 cursor-not-allowed flex items-center justify-center">
-                      <Download className="w-5 h-5 mr-2" /> Download PDF Report
+                      <Download className="w-5 h-5 mr-2" /> Report Withheld
                     </button>
                   </div>
                 )

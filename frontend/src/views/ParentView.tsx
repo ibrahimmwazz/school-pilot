@@ -161,12 +161,12 @@ export function ParentView() {
               <h3 className="text-base sm:text-lg font-black">Official Report Card PDF</h3>
               <p className="text-xs text-brand-100 font-medium">Download terminal academic performance report for {currentChild.firstName}.</p>
               <a
-                href="http://localhost:4000/reports/pilot-report.pdf"
+                href={`/api/reports/view/${currentChild.dbId || currentChild.id}/${currentChild.enrollmentId || 'active'}`}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full bg-white text-brand-700 font-bold text-xs py-2.5 sm:py-3 px-4 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm hover:bg-brand-50 transition-all"
               >
-                <Download className="w-4 h-4 mr-2" /> Download PDF Report Sheet
+                <Printer className="w-4 h-4 mr-2" /> View & Print Official Report Sheet
               </a>
             </div>
           </div>
