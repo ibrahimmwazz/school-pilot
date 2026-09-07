@@ -393,7 +393,7 @@ export function FormMasterView() {
                     </td>
                     <td className="py-4 px-6 text-right">
                       <a 
-                        href={`/api/reports/view/${enrollment.studentId || enrollment.id}/${activeTermId}`}
+                        href={`/api/reports/view/${enrollment.studentId || enrollment.id}/${activeTermId}?token=${encodeURIComponent(localStorage.getItem('token') || '')}`}
                         target="_blank"
                         rel="noreferrer"
                         className="bg-brand-600 hover:bg-brand-700 text-white font-black py-2 px-5 rounded-xl transition-all inline-flex items-center shadow-lg shadow-brand-500/20"

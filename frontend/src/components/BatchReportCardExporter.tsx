@@ -48,7 +48,11 @@ export function BatchReportCardExporter({
       if (!res.ok) throw new Error(data.message || 'Failed to generate report');
       
       if (data.url) {
-        window.open(data.url, '_blank');
+        const token = localStorage.getItem('token');
+        const finalUrl = token && !data.url.includes('token=')
+          ? `${data.url}${data.url.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`
+          : data.url;
+        window.open(finalUrl, '_blank');
       } else {
         alert('Report generation completed, but no URL was returned.');
       }

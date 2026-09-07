@@ -192,7 +192,7 @@ export function StudentView() {
                   <div>
                     <p className="text-brand-100 text-sm font-medium mb-6">Your results have been published and are ready for download.</p>
                     <a 
-                      href={`/api/reports/view/${data?.id || activeEnrollment?.studentId}/${activeEnrollment?.academicTermId}`} 
+                      href={`/api/reports/view/${data?.id || activeEnrollment?.studentId}/${activeEnrollment?.academicTermId}?token=${encodeURIComponent(localStorage.getItem('token') || '')}`} 
                       target="_blank" 
                       rel="noreferrer" 
                       className="w-full bg-white text-brand-600 font-black py-3 px-6 rounded-2xl hover:bg-brand-50 flex items-center justify-center transition-all shadow-md"

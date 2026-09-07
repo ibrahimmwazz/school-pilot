@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && npm install && npm run build",
+  "buildCommand": "npx --prefix backend prisma generate && npm run build --workspace=frontend",
   "outputDirectory": "frontend/dist",
   "rewrites": [
     {
@@ -9,7 +9,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/$1"
+      "destination": "/index.html"
     }
   ]
 }

@@ -161,7 +161,7 @@ export function ParentView() {
               <h3 className="text-base sm:text-lg font-black">Official Report Card PDF</h3>
               <p className="text-xs text-brand-100 font-medium">Download terminal academic performance report for {currentChild.firstName}.</p>
               <a
-                href={`/api/reports/view/${currentChild.dbId || currentChild.id}/${currentChild.enrollmentId || 'active'}`}
+                href={`/api/reports/view/${currentChild.dbId || currentChild.id}/${currentChild.enrollmentId || 'active'}?token=${encodeURIComponent(localStorage.getItem('token') || '')}`}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full bg-white text-brand-700 font-bold text-xs py-2.5 sm:py-3 px-4 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-sm hover:bg-brand-50 transition-all"
